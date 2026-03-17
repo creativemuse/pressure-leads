@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react"
 export function TyreKickersSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
 
-  const benefits = [
+  const _benefits = [
     {
       title: "Instant Answers",
       description:

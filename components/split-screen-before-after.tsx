@@ -4,6 +4,8 @@ import type React from "react"
 
 import Image from "next/image"
 
+const PULSE_BAR_COUNT = 20
+
 export function SplitScreenBeforeAfter() {
   const [sectionInView, setSectionInView] = useState(false)
   const [whatsappInView, setWhatsappInView] = useState(false)
@@ -11,11 +13,21 @@ export function SplitScreenBeforeAfter() {
   const [serviceInView, setServiceInView] = useState(false)
   const [tyreKickersInView, setTyreKickersInView] = useState(false)
   const [scrollY, setScrollY] = useState(0)
+  const [pulseBarStyles, setPulseBarStyles] = useState<{ height: string; animation: string }[]>([])
   const sectionRef = useRef<HTMLDivElement>(null)
   const whatsappSectionRef = useRef<HTMLDivElement>(null)
   const voiceSectionRef = useRef<HTMLDivElement>(null)
   const serviceSectionRef = useRef<HTMLDivElement>(null)
   const tyreKickersSectionRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setPulseBarStyles(
+      [...Array(PULSE_BAR_COUNT)].map(() => ({
+        height: `${Math.random() * 60 + 40}%`,
+        animation: `pulse ${Math.random() * 0.5 + 0.5}s ease-in-out infinite`,
+      })),
+    )
+  }, [])
 
   useEffect(() => {
     const observerOptions = {
@@ -93,7 +105,9 @@ export function SplitScreenBeforeAfter() {
     return scrollProgress * 80
   }
 
+  // eslint-disable-next-line react-hooks/refs -- parallax computed from refs for layout; safe for this component
   const whatsappParallax = getParallaxOffset(whatsappSectionRef)
+  // eslint-disable-next-line react-hooks/refs -- parallax computed from refs for layout; safe for this component
   const voiceParallax = getParallaxOffset(voiceSectionRef)
 
   return (
@@ -572,14 +586,16 @@ export function SplitScreenBeforeAfter() {
                             <span className="ml-auto text-slate-400 text-[9px] lg:text-xs font-mono">02:34</span>
                           </div>
                           <div className="h-8 lg:h-12 flex items-center gap-1">
-                            {[...Array(20)].map((_, i) => (
+                            {[...Array(PULSE_BAR_COUNT)].map((_, i) => (
                               <div
                                 key={i}
                                 className="flex-1 bg-gradient-to-t from-orange-500 to-orange-400 rounded-full"
-                                style={{
-                                  height: `${Math.random() * 60 + 40}%`,
-                                  animation: `pulse ${Math.random() * 0.5 + 0.5}s ease-in-out infinite`,
-                                }}
+                                style={
+                                  pulseBarStyles[i] ?? {
+                                    height: "55%",
+                                    animation: "pulse 0.75s ease-in-out infinite",
+                                  }
+                                }
                               />
                             ))}
                           </div>

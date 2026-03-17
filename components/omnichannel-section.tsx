@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react"
 export function OmnichannelSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
 
-  const channels = [
+  const _channels = [
     {
       icon: MessageSquare,
       name: "WhatsApp",

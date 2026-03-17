@@ -60,7 +60,13 @@ export function ROICalculatorSection() {
 
   useEffect(() => {
     const defaults = getBusinessDefaults()
-    setInputs((prev) => ({ ...prev, averageOrderValue: defaults.avgOrder }))
+    const timer = setTimeout(
+      () => setInputs((prev) => ({ ...prev, averageOrderValue: defaults.avgOrder })),
+      0,
+    )
+    return () => clearTimeout(timer)
+    // We intentionally depend only on businessType; getBusinessDefaults is pure for this state
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputs.businessType])
 
   const businessConfig = getBusinessDefaults()

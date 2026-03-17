@@ -2,7 +2,7 @@
 import type React from "react"
 import type { ComponentProps, ReactNode } from "react"
 import { motion, useReducedMotion } from "framer-motion"
-import { FacebookIcon, InstagramIcon, LinkedinIcon, YoutubeIcon } from "lucide-react"
+import { FacebookIcon, Instagram, LinkedinIcon, Youtube } from "lucide-react"
 import Image from "next/image"
 
 interface FooterLink {
@@ -48,8 +48,8 @@ const footerLinks: FooterSection[] = [
     label: "Social Links",
     links: [
       { title: "Facebook", href: "#", icon: FacebookIcon },
-      { title: "Instagram", href: "#", icon: InstagramIcon },
-      { title: "Youtube", href: "#", icon: YoutubeIcon },
+          { title: "Instagram", href: "#", icon: Instagram },
+          { title: "Youtube", href: "#", icon: Youtube },
       { title: "LinkedIn", href: "#", icon: LinkedinIcon },
     ],
   },
@@ -64,7 +64,7 @@ export function Footer() {
         <AnimatedContainer className="space-y-4">
           <Image src="/images/cliste-logo.png" alt="Cliste Logo" width={64} height={64} className="size-16" />
           <div className="text-muted-foreground mt-8 text-sm md:mt-0 md:block hidden">
-            <p>© {new Date().getFullYear()} Cliste. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} Leads.ai. All rights reserved.</p>
           </div>
         </AnimatedContainer>
 
@@ -93,12 +93,12 @@ export function Footer() {
       </div>
 
       <div className="md:hidden mt-8 text-center space-y-2">
-        <p className="text-muted-foreground text-sm">© {new Date().getFullYear()} Cliste. All rights reserved.</p>
-        <p className="text-muted-foreground text-xs">Web Development by Humexa</p>
+        <p className="text-muted-foreground text-sm">© {new Date().getFullYear()} leads.ai. All rights reserved.</p>
+        <p className="text-muted-foreground text-xs">Web Development by Creative Platform, Inc.</p>
       </div>
 
       <div className="hidden md:block mt-8 pt-6 border-t border-foreground/10 w-full">
-        <p className="text-muted-foreground text-xs text-center">Web Development by Humexa</p>
+        <p className="text-muted-foreground text-xs text-center">Web Development by Creative Platform, Inc.</p>
       </div>
     </footer>
   )

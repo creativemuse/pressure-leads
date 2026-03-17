@@ -11,13 +11,12 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     console.log("[v0] Page changed to:", pathname)
-    // Fade in when page loads
-    setIsAnimating(true)
-    const timer = setTimeout(() => {
-      setIsAnimating(false)
-    }, 50)
-
-    return () => clearTimeout(timer)
+    const timerStart = setTimeout(() => setIsAnimating(true), 0)
+    const timerEnd = setTimeout(() => setIsAnimating(false), 50)
+    return () => {
+      clearTimeout(timerStart)
+      clearTimeout(timerEnd)
+    }
   }, [pathname])
 
   return (

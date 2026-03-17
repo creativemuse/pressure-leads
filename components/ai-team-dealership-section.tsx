@@ -6,7 +6,7 @@ export function AiTeamDealershipSection() {
   const sectionRef = useRef<HTMLElement>(null)
   const [isVisible, setIsVisible] = useState(false)
   const [callsToday, setCallsToday] = useState(142)
-  const [chatsActive, setChatsActive] = useState(8)
+  const [, setChatsActive] = useState(8)
   const [appointmentsBooked, setAppointmentsBooked] = useState(23)
   const [partsQuotes, setPartsQuotes] = useState(17)
 

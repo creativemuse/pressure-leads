@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import Image from "next/image"
 import { MessageCircle, Clock, Zap } from "lucide-react"
 
 const conversations = [
@@ -101,7 +102,7 @@ export function AITeamSection() {
   const sectionRef = useRef<HTMLElement>(null) // Added section ref for intersection observer
   const [isVisible, setIsVisible] = useState(false)
   const [currentConversation, setCurrentConversation] = useState(0)
-  const [displayedMessages, setDisplayedMessages] = useState<any[]>([])
+  const [displayedMessages, setDisplayedMessages] = useState<{ text: string; sender: string; delay: number }[]>([])
   const [isTyping, setIsTyping] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
@@ -120,13 +121,14 @@ export function AITeamSection() {
       },
     )
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current)
+    const currentRef = sectionRef.current
+    if (currentRef) {
+      observer.observe(currentRef)
     }
 
     return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current)
+      if (currentRef) {
+        observer.unobserve(currentRef)
       }
     }
   }, [])
@@ -290,9 +292,11 @@ export function AITeamSection() {
 
                         <div className="bg-slate-900 px-6 py-4 text-white">
                           <div className="flex items-center gap-3">
-                            <img
+                            <Image
                               src="/images/michael-ai-agent.jpg"
                               alt="Michael - AI Agent"
+                              width={32}
+                              height={32}
                               className="w-8 h-8 rounded-full object-cover mr-2 mt-1 flex-shrink-0"
                             />
                             <div className="flex-1">
@@ -318,9 +322,11 @@ export function AITeamSection() {
                               className={`flex ${message.sender === "customer" ? "justify-end" : "justify-start"}`}
                             >
                               {message.sender === "ai" && (
-                                <img
+                                <Image
                                   src="/images/michael-ai-agent.jpg"
                                   alt="Michael"
+                                  width={24}
+                                  height={24}
                                   className="w-6 h-6 rounded-full object-cover mr-2 mt-1 flex-shrink-0"
                                 />
                               )}
@@ -346,9 +352,11 @@ export function AITeamSection() {
                           {/* Typing indicator */}
                           {isTyping && (
                             <div className="flex justify-start items-start">
-                              <img
+                              <Image
                                 src="/images/michael-ai-agent.jpg"
                                 alt="Michael"
+                                width={24}
+                                height={24}
                                 className="w-6 h-6 rounded-full object-cover mr-2 mt-1 flex-shrink-0"
                               />
                               <div className="bg-white p-3 rounded-2xl rounded-bl-md shadow-sm border border-slate-200">

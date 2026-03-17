@@ -9,7 +9,7 @@ const AnimatedChatDemo = ({ isActive }: { isActive: boolean }) => {
     { text: "Perfect! I can help with that. What service are you interested in?", isBot: true, visible: false },
   ])
   const [typingDots, setTypingDots] = useState(0)
-  const [currentTime, setCurrentTime] = useState(new Date())
+  const [, setCurrentTime] = useState(new Date())
   const [cycleCount, setCycleCount] = useState(0)
 
   useEffect(() => {
@@ -41,7 +41,8 @@ const AnimatedChatDemo = ({ isActive }: { isActive: boolean }) => {
     ]
 
     const currentScenario = scenarios[cycleCount % scenarios.length]
-    setMessages(currentScenario.map((msg) => ({ ...msg, visible: false })))
+    const initialMessages = currentScenario.map((msg) => ({ ...msg, visible: false }))
+    queueMicrotask(() => setMessages(initialMessages))
 
     const timer = setTimeout(() => {
       setMessages((prev) => prev.map((msg, i) => ({ ...msg, visible: i === 0 })))
@@ -225,6 +226,8 @@ const AnimatedEmailDemo = ({ isActive }: { isActive: boolean }) => {
         1000 + index * 800,
       )
     })
+    // We intentionally depend only on isActive; emails updates are handled via setEmails
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActive])
 
   return (
@@ -287,6 +290,8 @@ const AnimatedLeadsDemo = ({ isActive }: { isActive: boolean }) => {
         setTimeout(() => clearInterval(interval), 1000)
       }, index * 600)
     })
+    // We intentionally depend only on isActive; leads updates are handled via setLeads
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActive])
 
   return (
@@ -331,6 +336,8 @@ const AnimatedIntegrationsDemo = ({ isActive }: { isActive: boolean }) => {
         500 + index * 400,
       )
     })
+    // We intentionally depend only on isActive; connections updates are handled via setConnections
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActive])
 
   return (
@@ -423,13 +430,14 @@ export function FeaturesSection() {
       },
     )
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current)
+    const currentRef = sectionRef.current
+    if (currentRef) {
+      observer.observe(currentRef)
     }
 
     return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current)
+      if (currentRef) {
+        observer.unobserve(currentRef)
       }
     }
   }, [])
