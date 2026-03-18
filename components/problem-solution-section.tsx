@@ -176,7 +176,7 @@ export function ProblemSolutionSection() {
           }`}
         >
           <div className="text-center bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 sm:p-6 hover:bg-white/10 transition-all duration-300">
-            <div className="text-2xl sm:text-3xl font-bold text-white mb-2">€500+</div>
+            <div className="text-2xl sm:text-3xl font-bold text-white mb-2">$576+</div>
             <p className="text-white/70 text-xs sm:text-sm">Average value per lost lead</p>
           </div>
           <div className="text-center bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 sm:p-6 hover:bg-white/10 transition-all duration-300">

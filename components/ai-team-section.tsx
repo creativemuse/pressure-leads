@@ -6,91 +6,95 @@ import { MessageCircle, Clock, Zap } from "lucide-react"
 
 const conversations = [
   {
-    title: "Luxury Sedan Inquiry & Test Drive Booking",
+    title: "Pressure Washing Inquiry & Quote Generation",
     messages: [
-      { text: "Hi! I'm interested in the new Premium Sedan. Do you have any in stock?", sender: "customer", delay: 0 },
+      { text: "Hi! How much for a pressure washing on my home?", sender: "customer", delay: 0 },
       {
-        text: "We have several 2024 Premium Sedans available. Are you looking for a specific trim level or color?",
+        text: "I can definitely help with that! To give you the most accurate info, what specific areas are we looking to refresh today? (Driveway, siding, roof, etc.)",
         sender: "ai",
         delay: 1000,
       },
       {
-        text: "I'd prefer the Premium Plus trim in black or white. What's the price range?",
+        text: "The driveway and the front walkway are pretty dirty.",
         sender: "customer",
         delay: 2500,
       },
       {
-        text: "Great choice! The Premium Plus starts at €42,500. We have both black and white available. Would you like to schedule a test drive to experience it yourself?",
+        text: "No problem. Those high-traffic areas make a huge difference once they're brightened up. Do you happen to know the approximate square footage, or should I help you estimate it?",
         sender: "ai",
         delay: 3500,
       },
-      { text: "Yes, that would be perfect! When are you available?", sender: "customer", delay: 5000 },
+      { text: "It's a standard 2-car driveway.", sender: "customer", delay: 5000 },
       {
-        text: "I can book you for tomorrow at 2pm, Thursday at 11am, or Friday at 4pm. All test drives are completely free and include a full vehicle walkthrough.",
+        text: "Got it. To give you an Instant Quote right now, could you snap a quick photo of the driveway and walkway? I'll analyze the surface and the level of buildup for you.",
         sender: "ai",
         delay: 6000,
       },
-      { text: "Thursday at 11am works great!", sender: "customer", delay: 7500 },
       {
-        text: "Perfect! I've booked your free test drive for Thursday at 11:00 AM. You'll receive a confirmation text shortly. Just bring your driver's license and we'll have the sedan ready for you!",
+        text: "",
+        imageSrc: "/images/walkway_driveway.png",
+        imageAlt: "Uploaded driveway and walkway photo",
+        sender: "customer",
+        delay: 7500,
+      },
+      {
+        text: "Thanks! I see some organic growth and a few oil spots. We'll use a professional-grade treatment for those. Based on the photo, your quote is $245",
         sender: "ai",
         delay: 8500,
       },
     ],
   },
   {
-    title: "Vehicle Features & Financing",
+    title: "The customer is hosting an event soon and realized their property looks neglected.",
     messages: [
-      { text: "What's the fuel economy on the Luxury SUV?", sender: "customer", delay: 0 },
+      { text: "Hey, I just realized my back deck is covered in green mold and I have a family BBQ this Saturday. Do you guys have any openings before then?", sender: "customer", delay: 0 },
       {
-        text: "The 2024 Luxury SUV gets an EPA-estimated 23 city/28 highway MPG. It also comes with all-wheel drive standard!",
+        text: "I understand the urgency! We can definitely help get that deck ready for your BBQ. To give you an instant quote while the office is closed, could you upload a photo of the deck area? I'll check our schedule for this week immediately after.",
         sender: "ai",
         delay: 1000,
       },
       {
-        text: "That's good! What about financing options?",
+        text: "",
+        imageSrc: "/images/wooden_deck.png",
+        imageAlt: "Uploaded wooden deck photo",
         sender: "customer",
         delay: 2500,
       },
       {
-        text: "We have excellent financing available! Current rates start at 2.9% APR for qualified buyers, and we also offer lease options starting at €379/month.",
+        text: "Got it. That's definitely some heavy organic growth. For a soft-wash treatment to safely remove that mold, your quote is $210. I actually have a cancellation this Tuesday at 10:00 AM. Would you like to lock that in?",
         sender: "ai",
         delay: 4000,
-      },
-      { text: "Can I get pre-approved online?", sender: "customer", delay: 5500 },
-      {
-        text: "I can start your pre-approval right now. It takes just 2 minutes and won't affect your credit score. Would you like me to send you the secure link?",
-        sender: "ai",
-        delay: 6500,
       },
     ],
   },
   {
-    title: "After-Hours Service Inquiry",
+    title: "A customer is looking for a specific solution rather than a general cleaning.",
     messages: [
       {
-        text: "Hi, it's 11 PM. My car's check engine light just came on. What should I do?",
+        text: "Do you guys handle oil stains? My teenager’s car leaked all over our paver driveway and it looks terrible.",
         sender: "customer",
         delay: 0,
       },
       {
-        text: "I'm here to help! First, is the light solid or flashing? And is the car running normally?",
+        text: "We certainly do! Oil on pavers requires a specific degreasing treatment to lift the stain without damaging the stone. How old are the stains, and roughly how large is the affected area?",
         sender: "ai",
         delay: 1000,
       },
-      { text: "It's solid, and the car seems to be running fine", sender: "customer", delay: 2500 },
+      { text: "They've been there about a week. There are three big spots right in the center.", sender: "customer", delay: 2500 },
       {
-        text: "That's good news! A solid light usually isn't urgent. You can continue driving normally, but I'd recommend bringing it in within the next few days. I can schedule your service appointment right now if you'd like.",
+        text: "Understood. If you can snap a close-up photo of the spots, I can confirm if our deep-stain lifting process will work and give you a price right now.",
         sender: "ai",
         delay: 3500,
       },
       {
-        text: "Yes please! And do you offer loaner cars?",
+        text: "",
+        imageSrc: "/images/oil_pavers.png",
+        imageAlt: "Uploaded oil spots photo",
         sender: "customer",
         delay: 5000,
       },
       {
-        text: "I've scheduled you for Tuesday at 9 AM and reserved a loaner vehicle. You'll get a confirmation email with all the details. Drive safely!",
+        text: "Thanks for the clear photo. We can definitely treat those. For the oil extraction and a full driveway rinse, it would be $195. Should I see when our next technician is available in your area?",
         sender: "ai",
         delay: 6000,
       },
@@ -102,7 +106,9 @@ export function AITeamSection() {
   const sectionRef = useRef<HTMLElement>(null) // Added section ref for intersection observer
   const [isVisible, setIsVisible] = useState(false)
   const [currentConversation, setCurrentConversation] = useState(0)
-  const [displayedMessages, setDisplayedMessages] = useState<{ text: string; sender: string; delay: number }[]>([])
+  const [displayedMessages, setDisplayedMessages] = useState<
+    { text: string; sender: string; delay: number; imageSrc?: string; imageAlt?: string }[]
+  >([])
   const [isTyping, setIsTyping] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
@@ -200,7 +206,7 @@ export function AITeamSection() {
               }`}
             >
               <MessageCircle className="w-4 h-4" />
-              AI Car Sales Assistant Demo
+              AI Pressure Washing Assistant Demo
             </div>
 
             <h2
@@ -210,7 +216,7 @@ export function AITeamSection() {
             >
               See AI Handle{" "}
               <span className="bg-gradient-to-r from-slate-600 to-slate-400 bg-clip-text text-transparent">
-                Real Car Sales
+                Real Pressure Washing Sales
               </span>
             </h2>
 
@@ -219,7 +225,7 @@ export function AITeamSection() {
                 isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
               }`}
             >
-              Watch how our AI handles car inquiries, books test drives, and provides 24/7 automotive support.
+              Watch how our AI handles pressure washing inquiries, generates quotes, and provides 24/7 support.
             </p>
           </div>
 
@@ -232,12 +238,12 @@ export function AITeamSection() {
                 }`}
               >
                 <h3 className="text-2xl lg:text-3xl font-bold text-slate-900 mb-4 lg:mb-6">
-                  This is what your car buyers see
+                  This is what your pressure washing customers see
                 </h3>
 
                 <div className="space-y-3 lg:space-y-4 text-base lg:text-lg text-slate-700 leading-relaxed">
                   <p>
-                    While you're closed, your AI assistant is answering car questions, booking test drives, and helping
+                    While you're closed, your AI assistant is answering pressure washing questions, generating quotes, and helping
                     customers 24/7.
                   </p>
 
@@ -247,7 +253,7 @@ export function AITeamSection() {
                   </p>
 
                   <p className="text-lg lg:text-xl font-semibold text-slate-900">
-                    Your competitors are losing these car sales.
+                    Your competitors are losing these sales.
                   </p>
                 </div>
               </div>
@@ -259,10 +265,10 @@ export function AITeamSection() {
               >
                 <div className="p-4 lg:p-6 bg-slate-50 rounded-xl border-l-4 border-slate-900">
                   <p className="text-slate-800 font-medium text-sm lg:text-base">
-                    "We went from missing 70% of after-hours car inquiries to capturing every single lead. Our test
+                    "We went from missing 70% of after-hours pressure washing inquiries to capturing every single lead. Our test
                     drive bookings increased 50% in the first month."
                   </p>
-                  <p className="text-xs lg:text-sm text-slate-600 mt-2">— Mike Rodriguez, Car Dealership Owner</p>
+                  <p className="text-xs lg:text-sm text-slate-600 mt-2">— Mike Rodriguez, Pressure Washing Owner</p>
                 </div>
               </div>
             </div>
@@ -282,7 +288,7 @@ export function AITeamSection() {
                         <div className="bg-slate-50 px-6 py-3 flex justify-between items-center text-sm">
                           <div className="flex items-center gap-1">
                             <div className="w-2 h-2 bg-slate-900 rounded-full"></div>
-                            <span className="font-medium text-slate-700">Car Dealership AI</span>
+                            <span className="font-medium text-slate-700">Pressure Washing AI</span>
                           </div>
                           <div className="flex items-center gap-1 text-slate-500">
                             <Clock className="w-3 h-3" />
@@ -293,15 +299,15 @@ export function AITeamSection() {
                         <div className="bg-slate-900 px-6 py-4 text-white">
                           <div className="flex items-center gap-3">
                             <Image
-                              src="/images/michael-ai-agent.jpg"
-                              alt="Michael - AI Agent"
+                              src="/images/atlas.png"
+                              alt="Atlas - AI Agent"
                               width={32}
                               height={32}
                               className="w-8 h-8 rounded-full object-cover mr-2 mt-1 flex-shrink-0"
                             />
                             <div className="flex-1">
-                              <h3 className="font-semibold text-sm">Michael - AI Sales Agent</h3>
-                              <p className="text-xs text-slate-300">Chat with 087 234 5678</p>
+                              <h3 className="font-semibold text-sm">Atlas - AI Sales Agent</h3>
+                              <p className="text-xs text-slate-300">Chat with 904 234 5678</p>
                             </div>
                             <div className="text-xs text-green-400 flex items-center gap-1">
                               <div className="w-2 h-2 bg-green-400 rounded-full"></div>
@@ -323,8 +329,8 @@ export function AITeamSection() {
                             >
                               {message.sender === "ai" && (
                                 <Image
-                                  src="/images/michael-ai-agent.jpg"
-                                  alt="Michael"
+                                  src="/images/atlas.png"
+                                  alt="Atlas"
                                   width={24}
                                   height={24}
                                   className="w-6 h-6 rounded-full object-cover mr-2 mt-1 flex-shrink-0"
@@ -337,9 +343,22 @@ export function AITeamSection() {
                                     : "bg-white text-slate-800 shadow-sm border border-slate-200 rounded-bl-md"
                                 }`}
                               >
-                                {message.text.split("\n").map((line, i) => (
-                                  <div key={i}>{line}</div>
-                                ))}
+                                {message.imageSrc ? (
+                                  <div className="rounded-lg overflow-hidden shadow-md w-40">
+                                    <Image
+                                      src={message.imageSrc}
+                                      alt={message.imageAlt ?? "Uploaded photo"}
+                                      width={160}
+                                      height={120}
+                                      className="w-40 h-auto object-cover"
+                                    />
+                                  </div>
+                                ) : null}
+                                {message.text
+                                  ? message.text.split("\n").map((line, i) => (
+                                      <div key={i}>{line}</div>
+                                    ))
+                                  : null}
                               </div>
                               {message.sender === "customer" && (
                                 <div className="w-6 h-6 rounded-full bg-slate-400 ml-2 mt-1 flex-shrink-0 flex items-center justify-center text-xs text-white font-medium">
@@ -353,8 +372,8 @@ export function AITeamSection() {
                           {isTyping && (
                             <div className="flex justify-start items-start">
                               <Image
-                                src="/images/michael-ai-agent.jpg"
-                                alt="Michael"
+                                src="/images/atlas.png"
+                                alt="Atlas"
                                 width={24}
                                 height={24}
                                 className="w-6 h-6 rounded-full object-cover mr-2 mt-1 flex-shrink-0"
@@ -378,7 +397,7 @@ export function AITeamSection() {
 
                         <div className="p-4 bg-white border-t border-slate-200">
                           <div className="flex items-center gap-3 bg-slate-100 rounded-full px-4 py-2">
-                            <span className="text-slate-500 text-sm lg:text-base flex-1">Michael is responding...</span>
+                            <span className="text-slate-500 text-sm lg:text-base flex-1">Atlas is responding...</span>
                             <div className="w-6 h-6 bg-slate-900 rounded-full flex items-center justify-center">
                               <Zap className="w-3 h-3 text-white" />
                             </div>

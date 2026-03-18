@@ -6,10 +6,11 @@ import Image from "next/image"
 import Link from "next/link"
 
 const navigation = [
-  { name: "Dentists", href: "#features" },
-  { name: "Barbers & Salons", href: "#ai-team" },
-  { name: "Restaurants", href: "#testimonials" },
-  { name: "Car Dealerships", href: "/car-dealerships" },
+  { name: "Features", href: "/#features" },
+  { name: "AI Team", href: "/#ai-team" },
+  { name: "Testimonials", href: "/#testimonials" },
+  { name: "ROI Calculator", href: "/#roi-calculator" },
+  { name: "Partners", href: "/partners" },
 ]
 
 export function GlassmorphismNav() {

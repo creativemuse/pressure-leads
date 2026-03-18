@@ -189,7 +189,7 @@ export function ROICalculatorSection() {
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-3">
                     Average Order Value:{" "}
-                    <span className="text-white font-semibold">€{inputs.averageOrderValue.toLocaleString()}</span>
+                    <span className="text-white font-semibold">${inputs.averageOrderValue.toLocaleString()}</span>
                   </label>
                   <Slider
                     value={[inputs.averageOrderValue]}
@@ -200,8 +200,8 @@ export function ROICalculatorSection() {
                     className="w-full"
                   />
                   <div className="flex justify-between text-xs text-gray-400 mt-1">
-                    <span>€25</span>
-                    <span>€{businessConfig.maxOrder.toLocaleString()}</span>
+                    <span>$25</span>
+                    <span>${businessConfig.maxOrder.toLocaleString()}</span>
                   </div>
                 </div>
 
@@ -267,7 +267,7 @@ export function ROICalculatorSection() {
           >
             <Card className="p-6 md:p-8 bg-[radial-gradient(35%_128px_at_50%_0%,theme(backgroundColor.white/15%),theme(backgroundColor.white/5%))] border-white/20 backdrop-blur-sm shadow-2xl h-full flex flex-col">
               <h3 className="text-xl md:text-2xl font-semibold text-white mb-6 md:mb-8">
-                Your Potential with Cliste AI
+                Your Potential with Leads AI
               </h3>
 
               <div className="space-y-6 flex-1">
@@ -279,7 +279,7 @@ export function ROICalculatorSection() {
                     <div className="text-xs text-gray-400">leads/month</div>
                   </div>
                   <div className="text-center p-3 md:p-4 rounded-lg bg-white/10 border border-white/20">
-                    <div className="text-xs md:text-sm text-gray-300 mb-1">With Cliste</div>
+                    <div className="text-xs md:text-sm text-gray-300 mb-1">With Leads</div>
                     <div className="text-xl md:text-2xl font-bold text-white">{newLeads}</div>
                     <div className="text-xs text-gray-300">leads/month</div>
                   </div>
@@ -300,7 +300,7 @@ export function ROICalculatorSection() {
                       <span className="text-sm md:text-base text-white">Additional Revenue</span>
                     </div>
                     <span className="text-lg md:text-xl font-bold text-white">
-                      €{additionalRevenue.toLocaleString()}
+                      ${additionalRevenue.toLocaleString()}
                     </span>
                   </div>
 
@@ -326,7 +326,7 @@ export function ROICalculatorSection() {
                   <div className="text-center">
                     <div className="text-xs md:text-sm text-gray-300 mb-2">Projected Annual Revenue Increase</div>
                     <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2">
-                      €{(additionalRevenue * 12).toLocaleString()}
+                      ${(additionalRevenue * 12).toLocaleString()}
                     </div>
                     <div className="text-xs md:text-sm text-gray-400">
                       Based on your current metrics and industry benchmarks
