@@ -366,47 +366,143 @@ const AnimatedIntegrationsDemo = ({ isActive }: { isActive: boolean }) => {
   )
 }
 
+const DrivewayGifDemo = ({ isActive }: { isActive: boolean }) => {
+  return (
+    <div
+      className={`rounded-lg h-32 overflow-hidden transition-opacity duration-300 ${
+        isActive ? "opacity-100" : "opacity-90"
+      }`}
+    >
+      <img
+        src="/videos/Power_wash_driveway.gif"
+        alt="Power washing a driveway"
+        className="w-full h-full object-cover"
+      />
+    </div>
+  )
+}
+
+const HouseWashingImageDemo = ({ isActive }: { isActive: boolean }) => {
+  return (
+    <div
+      className={`rounded-lg h-32 overflow-hidden transition-opacity duration-300 ${
+        isActive ? "opacity-100" : "opacity-90"
+      }`}
+    >
+      <img
+        src="/house_vinyl_wash.png"
+        alt="House siding being pressure washed"
+        className="w-full h-full object-cover object-center scale-110"
+      />
+    </div>
+  )
+}
+
+const RoofSoftWashImageDemo = ({ isActive }: { isActive: boolean }) => {
+  return (
+    <div
+      className={`rounded-lg h-32 overflow-hidden transition-opacity duration-300 ${
+        isActive ? "opacity-100" : "opacity-90"
+      }`}
+    >
+      <img
+        src="/images/roof_wash.png"
+        alt="Roof soft wash service"
+        className="w-full h-full object-cover object-center scale-110"
+      />
+    </div>
+  )
+}
+
+const PatioDeckImageDemo = ({ isActive }: { isActive: boolean }) => {
+  return (
+    <div
+      className={`rounded-lg h-32 overflow-hidden transition-opacity duration-300 ${
+        isActive ? "opacity-100" : "opacity-90"
+      }`}
+    >
+      <img
+        src="/images/Sawgrass_Wooden_Deck.png"
+        alt="Clean wooden deck and patio"
+        className="w-full h-full object-cover object-center scale-110"
+      />
+    </div>
+  )
+}
+
+const FenceCleaningImageDemo = ({ isActive }: { isActive: boolean }) => {
+  return (
+    <div
+      className={`rounded-lg h-32 overflow-hidden transition-opacity duration-300 ${
+        isActive ? "opacity-100" : "opacity-90"
+      }`}
+    >
+      <img
+        src="/images/vinyl_fence.png"
+        alt="Vinyl fence being pressure washed"
+        className="w-full h-full object-cover object-center scale-110"
+      />
+    </div>
+  )
+}
+
+const CommercialCleaningImageDemo = ({ isActive }: { isActive: boolean }) => {
+  return (
+    <div
+      className={`rounded-lg h-32 overflow-hidden transition-opacity duration-300 ${
+        isActive ? "opacity-100" : "opacity-90"
+      }`}
+    >
+      <img
+        src="/images/pressure_wash_business.png"
+        alt="Commercial building being pressure washed"
+        className="w-full h-full object-cover object-center scale-110"
+      />
+    </div>
+  )
+}
+
 const features = [
   {
     title: "Driveway Cleaning",
     description:
       "Removes dirt, oil stains, and buildup to restore your driveway.",
-    demo: AnimatedChatDemo,
+    demo: DrivewayGifDemo,
     size: "large",
   },
   {
     title: "House Washing",
     description:
       "Safely cleans siding, removing mold, mildew, and grime.",
-    demo: AnimatedPhoneDemo,
+    demo: HouseWashingImageDemo,
     size: "medium",
   },
   {
     title: "Roof Soft Wash",
     description:
       "Gently removes black streaks and algae without damage.",
-    demo: AnimatedCalendarDemo,
+    demo: RoofSoftWashImageDemo,
     size: "medium",
   },
   {
     title: "Patio & Deck Cleaning",
     description:
       "Brings outdoor spaces back to life for a fresh, clean look.",
-    demo: AnimatedEmailDemo,
+    demo: PatioDeckImageDemo,
     size: "large",
   },
   {
     title: "Fence Cleaning",
     description:
       "Restores wood and vinyl fences to their original appearance.",
-    demo: AnimatedLeadsDemo,
+    demo: FenceCleaningImageDemo,
     size: "medium",
   },
   {
     title: "Commercial Cleaning",
     description:
       "Keep storefronts and properties clean and professional",
-    demo: AnimatedIntegrationsDemo,
+    demo: CommercialCleaningImageDemo,
     size: "medium",
   },
 ]
