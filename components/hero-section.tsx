@@ -12,23 +12,11 @@ const ArrowRight = () => (
   </svg>
 )
 
-const Play = () => (
-  <svg
-    className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h1m4 0h1m-6-8h8a2 2 0 012 2v8a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2z"
-    />
-  </svg>
-)
+type HeroSectionProps = {
+  onQuoteClick: () => void
+}
 
-export function HeroSection() {
+export function HeroSection({ onQuoteClick }: HeroSectionProps) {
   return (
     <section className="min-h-screen flex items-center justify-center px-4 py-20 relative">
       <div className="max-w-4xl mx-auto text-center relative z-10 animate-fade-in-hero">
@@ -72,6 +60,7 @@ export function HeroSection() {
           <Button
             size="lg"
             className="bg-white text-black rounded-full px-8 py-4 text-lg font-medium transition-all duration-300 hover:bg-gray-50 hover:scale-105 hover:shadow-lg group cursor-pointer relative overflow-hidden"
+            onClick={onQuoteClick}
           >
             Get My Free Quote
             <ArrowRight />

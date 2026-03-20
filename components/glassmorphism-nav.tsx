@@ -6,14 +6,18 @@ import Image from "next/image"
 import Link from "next/link"
 
 const navigation = [
-  { name: "Services", href: "/#features" },
-  { name: "Reviews", href: "/#testimonials" },
-  { name: "Contact", href: "/#contact" },
+  { name: "Services", href: "#features" },
+  { name: "Reviews", href: "#testimonials" },
+  { name: "Contact", href: "#contact" },
   // { name: "ROI Calculator", href: "/#roi-calculator" },
   // { name: "Partners", href: "/partners" },
 ]
 
-export function GlassmorphismNav() {
+type GlassmorphismNavProps = {
+  onQuoteClick: () => void
+}
+
+export function GlassmorphismNav({ onQuoteClick }: GlassmorphismNavProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(true)
   const [hasLoaded, setHasLoaded] = useState(false)
@@ -129,7 +133,15 @@ export function GlassmorphismNav() {
               {/* Desktop Navigation */}
               <div className="hidden md:flex items-center space-x-8">
                 {navigation.map((item) =>
-                  item.href.startsWith("/") ? (
+                  item.name === "Contact" ? (
+                    <button
+                      key={item.name}
+                      onClick={onQuoteClick}
+                      className="text-white/80 hover:text-white hover:scale-105 transition-all duration-200 font-medium cursor-pointer"
+                    >
+                      {item.name}
+                    </button>
+                  ) : item.href.startsWith("/") ? (
                     <Link
                       key={item.name}
                       href={item.href}
@@ -153,7 +165,7 @@ export function GlassmorphismNav() {
               <div className="hidden md:block">
                 <button
                   className="relative bg-white hover:bg-gray-50 text-black font-medium px-6 py-2 rounded-full flex items-center transition-all duration-300 hover:scale-105 hover:shadow-lg cursor-pointer group"
-                  onClick={() => scrollToSection("#contact")}
+                  onClick={onQuoteClick}
                 >
                   <span className="mr-2">Get Free Quote</span>
                   <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
@@ -203,7 +215,23 @@ export function GlassmorphismNav() {
             <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 shadow-2xl">
               <div className="flex flex-col space-y-1">
                 {navigation.map((item, index) =>
-                  item.href.startsWith("/") ? (
+                  item.name === "Contact" ? (
+                    <button
+                      key={item.name}
+                      onClick={() => {
+                        setIsOpen(false)
+                        onQuoteClick()
+                      }}
+                      className={`text-white/80 hover:text-white hover:bg-white/10 rounded-lg px-3 py-3 text-left transition-all duration-300 font-medium cursor-pointer transform hover:scale-[1.02] hover:translate-x-1 ${
+                        isOpen ? "animate-mobile-menu-item" : ""
+                      }`}
+                      style={{
+                        animationDelay: isOpen ? `${index * 80 + 100}ms` : "0ms",
+                      }}
+                    >
+                      {item.name}
+                    </button>
+                  ) : item.href.startsWith("/") ? (
                     <Link
                       key={item.name}
                       href={item.href}
@@ -240,7 +268,10 @@ export function GlassmorphismNav() {
                   style={{
                     animationDelay: isOpen ? `${navigation.length * 80 + 150}ms` : "0ms",
                   }}
-                  onClick={() => scrollToSection("#contact")}
+                  onClick={() => {
+                    setIsOpen(false)
+                    onQuoteClick()
+                  }}
                 >
                   <span className="mr-2">Get Free Quote</span>
                   <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />

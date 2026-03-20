@@ -238,22 +238,22 @@ export function AITeamSection() {
                 }`}
               >
                 <h3 className="text-2xl lg:text-3xl font-bold text-slate-900 mb-4 lg:mb-6">
-                  This is what your pressure washing customers see
+                  Pressure Washing Service Made Easy
                 </h3>
 
                 <div className="space-y-3 lg:space-y-4 text-base lg:text-lg text-slate-700 leading-relaxed">
                   <p>
-                    While you're closed, your AI assistant is answering pressure washing questions, generating quotes, and helping
-                    customers 24/7.
+                  See how easy it is to get your pressure washing service scheduled. From your first question to a fast quote and booking, every step is handled quickly so you can get your home cleaned without the wait.
+
+
                   </p>
 
                   <p>
-                    Every conversation you're watching could be happening at midnight, on Sundays, or when your sales
-                    team is with other customers.
+                  Whether you reach out during the day, in the evening, or over the weekend, you’ll get clear answers, upfront pricing, and help booking your service right away.
                   </p>
 
                   <p className="text-lg lg:text-xl font-semibold text-slate-900">
-                    Your competitors are losing these sales.
+                    Get your pressure washing service scheduled quickly and easily.
                   </p>
                 </div>
               </div>
@@ -265,10 +265,9 @@ export function AITeamSection() {
               >
                 <div className="p-4 lg:p-6 bg-slate-50 rounded-xl border-l-4 border-slate-900">
                   <p className="text-slate-800 font-medium text-sm lg:text-base">
-                    "We went from missing 70% of after-hours pressure washing inquiries to capturing every single lead. Our test
-                    drive bookings increased 50% in the first month."
+                    "I needed my driveway and patio cleaned and didn’t want to wait days just to hear back. I reached out and got a response almost immediately with clear pricing and available times. The whole process was simple, fast, and stress-free. They showed up on time and did an amazing job—everything looks brand new. I’ll definitely be using them again."
                   </p>
-                  <p className="text-xs lg:text-sm text-slate-600 mt-2">— Mike Rodriguez, Pressure Washing Owner</p>
+                  <p className="text-xs lg:text-sm text-slate-600 mt-2">— Sarah M., Homeowner</p>
                 </div>
               </div>
             </div>

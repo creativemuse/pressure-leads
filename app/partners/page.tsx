@@ -21,7 +21,7 @@ export default function PartnersPage() {
 
         <div className="relative z-10">
           {/* Navbar */}
-          <GlassmorphismNav />
+          <GlassmorphismNav onQuoteClick={() => {}} />
 
           <section className="min-h-screen flex items-start justify-center px-4 pt-24 md:pt-32 pb-20 relative">
             <div className="max-w-4xl mx-auto text-center relative z-10">
