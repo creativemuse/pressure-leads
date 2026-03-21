@@ -121,7 +121,7 @@ export function GlassmorphismNav({ onQuoteClick }: GlassmorphismNavProps) {
               >
                 <div className="h-14 w-14 shrink-0 md:h-[5.5rem] md:w-[5.5rem] flex items-center justify-center">
                   <Image
-                    src="/pressurewash_logo.svg"
+                    src="/Pressurewash_logo.svg"
                     alt="St. Augustine Pressure Washing Pros"
                     width={176}
                     height={176}

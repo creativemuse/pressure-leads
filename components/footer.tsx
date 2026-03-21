@@ -72,7 +72,7 @@ export function Footer() {
       <div className="grid w-full gap-8 xl:grid-cols-3 xl:gap-8">
         <AnimatedContainer className="space-y-4">
           <Image
-            src="/pressurewash_logo.svg"
+            src="/Pressurewash_logo.svg"
             alt="St. Augustine Pressure Washing Pros"
             width={240}
             height={240}
