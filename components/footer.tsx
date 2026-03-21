@@ -42,15 +42,15 @@ const footerLinks: FooterSection[] = [
         title: "Service areas (St. Augustine, St. Johns, & more)",
         href: "/#contact",
       },
-      {
-        title: "(904) XXX-XXXX",
-        href: "tel:+19045551234",
-      },
-      {
-        title: "hello@pressureleads.com",
-        href: "mailto:hello@pressureleads.com",
-      },
-      { title: "Mon–Sat · 8am–6pm" },
+      // {
+      //   title: "+1 (888) 859-9912",
+      //   href: "tel:+18888599912",
+      // },
+      // {
+      //   title: "hello@pressureleads.com",
+      //   href: "mailto:hello@pressureleads.com",
+      // },
+      { title: "Sun–Sat · 24 hours" },
     ],
   },
   {
@@ -71,7 +71,13 @@ export function Footer() {
 
       <div className="grid w-full gap-8 xl:grid-cols-3 xl:gap-8">
         <AnimatedContainer className="space-y-4">
-          <Image src="/images/cliste-logo.png" alt="Cliste Logo" width={64} height={64} className="size-16" />
+          <Image
+            src="/logo.png"
+            alt="St. Augustine Pressure Washing Pros"
+            width={240}
+            height={240}
+            className="h-28 w-auto max-w-[min(100%,320px)] object-contain object-left md:h-36"
+          />
           <div className="text-muted-foreground mt-8 text-sm md:mt-0 md:block hidden">
             <p>© {new Date().getFullYear()} staugustinepressurewashingpros.com. All rights reserved.</p>
           </div>

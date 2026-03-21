@@ -9,6 +9,13 @@ lerna-debug.log*
 
 node_modules
 dist
+
+# This project uses Yarn — ignore other package managers' lockfiles
+package-lock.json
+npm-shrinkwrap.json
+pnpm-lock.yaml
+bun.lock
+bun.lockb
 dist-ssr
 *.local
 .next/*

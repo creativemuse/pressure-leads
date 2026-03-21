@@ -23,7 +23,7 @@ const siteTitle = "St. Augustine Pressure Washing Pros"
 const siteDescription =
   "Get your pressure washing service scheduled quickly and easily. From your first question to a fast quote and booking, every step is handled quickly so you can get your home cleaned without the wait."
 
-const ogImagePath = "/images/before_after/home.jpg"
+const ogImagePath = "/images/before_after/home.png"
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||

@@ -63,7 +63,7 @@ export function AiTeamDealershipSection() {
           >
             <div className="inline-flex items-center px-5 py-2.5 rounded-full bg-gradient-to-r from-slate-100 to-slate-50 border border-slate-200/80 shadow-sm text-slate-700 text-sm font-semibold mb-6">
               <span className="w-2.5 h-2.5 bg-green-500 rounded-full mr-2.5 animate-pulse shadow-lg shadow-green-500/50"></span>
-              AI Working 24/7 - Never Miss a Lead
+              Booking Appointments 24/7
             </div>
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-slate-900 mb-4 sm:mb-6 tracking-tight">
               Our Pressure{" "}

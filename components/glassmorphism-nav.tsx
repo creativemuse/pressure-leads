@@ -82,7 +82,7 @@ export function GlassmorphismNav({ onQuoteClick }: GlassmorphismNavProps) {
       const rect = element.getBoundingClientRect()
       const currentScrollY = window.pageYOffset || document.documentElement.scrollTop
       const elementAbsoluteTop = rect.top + currentScrollY
-      const navbarHeight = 100
+      const navbarHeight = 120
       const targetPosition = Math.max(0, elementAbsoluteTop - navbarHeight)
 
       console.log("[v0] Element rect.top:", rect.top)
@@ -112,20 +112,21 @@ export function GlassmorphismNav({ onQuoteClick }: GlassmorphismNavProps) {
       >
         {/* Main Navigation */}
         <div className="w-[90vw] max-w-xs md:max-w-4xl mx-auto">
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-3 md:px-6 md:py-2">
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-2.5 md:px-6 md:py-2.5">
             <div className="flex items-center justify-between">
               {/* Logo */}
               <Link
                 href="/"
                 className="flex items-center hover:scale-105 transition-transform duration-200 cursor-pointer"
               >
-                <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center">
+                <div className="h-14 w-14 shrink-0 md:h-[5.5rem] md:w-[5.5rem] flex items-center justify-center">
                   <Image
-                    src="/images/cliste-logo.png"
-                    alt="Cliste"
-                    width={40}
-                    height={40}
-                    className="w-full h-full object-contain"
+                    src="/logo.png"
+                    alt="St. Augustine Pressure Washing Pros"
+                    width={176}
+                    height={176}
+                    className="h-full w-full object-contain"
+                    priority
                   />
                 </div>
               </Link>
