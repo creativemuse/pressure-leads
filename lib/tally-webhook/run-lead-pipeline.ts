@@ -1,8 +1,13 @@
 import Anthropic from "@anthropic-ai/sdk"
 import { Resend } from "resend"
+import type { ContractorProfile } from "@/lib/contractor-redis"
 import { resolveContractorForLead } from "@/lib/contractor-redis"
+import { isEvmAddress } from "@/lib/evm-address"
+
+import { recordLeadProcessed } from "@/lib/lead-stats"
 
 import { getFallbackContractorFromEnv } from "./fallback-contractor"
+import { leadEmailBodyWithStructuredFacts } from "./pressure-washing-lead-fields"
 
 const DEFAULT_ANTHROPIC_MODEL = "claude-3-5-haiku-20241022"
 const DEFAULT_CROSSMINT_API_BASE = "https://www.crossmint.com/api"
@@ -83,6 +88,13 @@ function walletLocatorFromEmail(email: string): string {
   return `email:${email}:evm`
 }
 
+/** Crossmint `/wallets/...` segment: explicit Creative Bank 0x address when onboarded, else email smart-wallet locator. */
+function crossmintWalletPathSegment(contractor: ContractorProfile): string {
+  const w = contractor.evmWalletAddress?.trim()
+  if (w && isEvmAddress(w)) return w.toLowerCase()
+  return walletLocatorFromEmail(contractor.email)
+}
+
 async function pinJsonToIpfs(payload: unknown, jwt: string): Promise<string> {
   const res = await fetch("https://api.pinata.cloud/pinning/pinJSONToIPFS", {
     method: "POST",
@@ -159,6 +171,7 @@ async function sendLeadEmail(
 
 /**
  * Full lead processing after Tally returns 200. Errors are logged; use Vercel logs / alerts.
+ * See `docs/LEAD_PIPELINE.md` for Pinata IPFS vs Agents, Crossmint, and optional Redis lead stats.
  */
 export async function runLeadPipeline(payload: unknown): Promise<void> {
   const responseId = tallyResponseId(payload)
@@ -177,8 +190,8 @@ export async function runLeadPipeline(payload: unknown): Promise<void> {
   const chain = (process.env.CROSSMINT_CHAIN ?? DEFAULT_CROSSMINT_CHAIN).trim()
   const tokenLocator = `${chain}:usdc`
   const contractorEmail = contractor.email
-  const walletLoc = walletLocatorFromEmail(contractorEmail)
-  const encodedWallet = encodeURIComponent(walletLoc)
+  const walletSeg = crossmintWalletPathSegment(contractor)
+  const encodedWallet = encodeURIComponent(walletSeg)
 
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
 
@@ -186,6 +199,7 @@ export async function runLeadPipeline(payload: unknown): Promise<void> {
   console.info("[tally-webhook] pinned", { ipfsCid, responseId })
 
   const leadSummary = await formatLeadNotificationLine(anthropic, payload)
+  const leadEmailBody = leadEmailBodyWithStructuredFacts(leadSummary, payload)
 
   const balanceUrl = `${crossmintBase}/2025-06-09/wallets/${encodedWallet}/balances?tokens=usdc&chains=${encodeURIComponent(chain)}`
   const balanceRes = await fetch(balanceUrl, { headers: crossmintHeaders() })
@@ -207,8 +221,9 @@ export async function runLeadPipeline(payload: unknown): Promise<void> {
   const adminEmail = process.env.ADMIN_EMAIL!.trim()
 
   if (!funded) {
-    const manualText = `MANUAL ROUTING REQUIRED: Contractor had insufficient USDC.\n${leadSummary}`
+    const manualText = `MANUAL ROUTING REQUIRED: Contractor had insufficient USDC.\n${leadEmailBody}`
     await sendLeadEmail(resend, resendFrom, adminEmail, "Pressure Leads: manual routing (insufficient USDC)", manualText)
+    await recordLeadProcessed(zip)
     console.info("[tally-webhook] done", { responseId, routing: "admin", payment: "skipped", zip })
     return
   }
@@ -247,7 +262,7 @@ export async function runLeadPipeline(payload: unknown): Promise<void> {
     transferStatus === "awaiting_signature"
 
   if (needsManualApproval) {
-    const manualText = `MANUAL ROUTING REQUIRED: Lead fee transfer awaiting signer approval (${transferStatus}).\n${leadSummary}`
+    const manualText = `MANUAL ROUTING REQUIRED: Lead fee transfer awaiting signer approval (${transferStatus}).\n${leadEmailBody}`
     await sendLeadEmail(
       resend,
       resendFrom,
@@ -255,10 +270,12 @@ export async function runLeadPipeline(payload: unknown): Promise<void> {
       `Pressure Leads: manual routing (${transferStatus})`,
       manualText,
     )
+    await recordLeadProcessed(zip)
     console.info("[tally-webhook] done", { responseId, routing: "admin", transferStatus, zip })
     return
   }
 
-  await sendLeadEmail(resend, resendFrom, contractor.email, "New lead", leadSummary)
+  await sendLeadEmail(resend, resendFrom, contractor.email, "New lead", leadEmailBody)
+  await recordLeadProcessed(zip)
   console.info("[tally-webhook] done", { responseId, routing: "contractor", transferStatus, zip })
 }

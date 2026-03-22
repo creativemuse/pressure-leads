@@ -1,6 +1,7 @@
 import { waitUntil } from "@vercel/functions"
 import { type NextRequest, NextResponse } from "next/server"
 
+import { isEvmAddress } from "@/lib/evm-address"
 import { getFallbackContractorFromEnv } from "@/lib/tally-webhook/fallback-contractor"
 import { runLeadPipeline } from "@/lib/tally-webhook/run-lead-pipeline"
 import { SIGNATURE_HEADERS, verifyTallySignature } from "@/lib/tally-webhook/tally-signature"
@@ -16,12 +17,10 @@ export const maxDuration = 60
  * `LEAD_FEE_USDC`, `TREASURY_WALLET_ADDRESS`,
  * `CONTRACTOR_FALLBACK_EMAIL`, `CONTRACTOR_FALLBACK_PHONE_E164` (E.164).
  * Optional: `CROSSMINT_PROJECT_ID`, `CROSSMINT_API_BASE`, `CROSSMINT_CHAIN`, `ANTHROPIC_MODEL`,
- * `CROSSMINT_TRANSFER_SIGNER`, Redis zip routing envs (`REDIS_URL`, `TALLY_ZIP_FIELD_*`).
+ * `CROSSMINT_TRANSFER_SIGNER`, Redis zip routing envs (`REDIS_URL`, `TALLY_ZIP_FIELD_*`, optional `TALLY_LEAD_*_KEY`).
+ *
+ * Architecture (Pinata IPFS vs Agents, Crossmint, ops API): see `docs/LEAD_PIPELINE.md`.
  */
-
-function isEvmAddress(s: string): boolean {
-  return /^0x[a-fA-F0-9]{40}$/.test(s.trim())
-}
 
 function tallyResponseId(payload: unknown): string | undefined {
   if (payload == null || typeof payload !== "object") return undefined

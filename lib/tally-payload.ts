@@ -38,6 +38,30 @@ export function findFieldValueByLabel(
   return null
 }
 
+/**
+ * When Tally repeats the same label (e.g. section title + question), returns the last non-empty value.
+ */
+export function findFieldValueByLabelPreferNonEmpty(
+  fields: TallyField[],
+  label: string,
+  options?: { ignoreCase?: boolean },
+): string | null {
+  const want = label.trim()
+  if (!want) return null
+  const cmp = (a: string, b: string) =>
+    options?.ignoreCase ? a.toLowerCase() === b.toLowerCase() : a === b
+
+  let lastNonEmpty: string | null = null
+  for (const f of fields) {
+    const l = typeof f.label === "string" ? f.label.trim() : ""
+    if (!l || !cmp(l, want)) continue
+    const s = fieldValueToString(f.value)
+    const t = s?.trim()
+    if (t) lastNonEmpty = t
+  }
+  return lastNonEmpty
+}
+
 /** Prefer stable `key` from one captured webhook (e.g. `question_xYz123`). */
 export function findFieldValueByKey(fields: TallyField[], key: string): string | null {
   const want = key.trim()
@@ -55,6 +79,22 @@ function fieldValueToString(value: unknown): string | null {
   if (typeof value === "string") return value
   if (typeof value === "number" && Number.isFinite(value)) return String(value)
   if (typeof value === "boolean") return value ? "true" : "false"
+  if (Array.isArray(value)) {
+    const parts: string[] = []
+    for (const item of value) {
+      const s = fieldValueToString(item)
+      if (s != null && s !== "") parts.push(s)
+    }
+    if (parts.length === 0) return null
+    return parts.join(", ")
+  }
+  if (typeof value === "object") {
+    const o = value as Record<string, unknown>
+    if (typeof o.text === "string" && o.text.trim()) return o.text.trim()
+    if (typeof o.label === "string" && o.label.trim()) return o.label.trim()
+    if (typeof o.value === "string" && o.value.trim()) return o.value.trim()
+    if (typeof o.title === "string" && o.title.trim()) return o.title.trim()
+  }
   return null
 }
 
