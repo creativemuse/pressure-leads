@@ -5,10 +5,14 @@ import { getRedis } from "@/lib/redis"
 export const runtime = "nodejs"
 
 /**
- * Example route aligned with Vercel Redis + node-redis.
- * Prerequisite: `vercel link`, then `vercel env pull .env.development.local` (or set `REDIS_URL` yourself).
+ * Example route for local Redis (e.g. Vercel Redis + node-redis).
+ * Disabled in production builds (`NODE_ENV === "production"`) to avoid an open Redis probe endpoint.
+ * Prerequisite when enabled: set `REDIS_URL` (e.g. `vercel env pull .env.development.local`).
  */
 export async function POST() {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 })
+  }
   try {
     const redis = await getRedis()
     const result = await redis.get("item")
@@ -18,4 +22,8 @@ export async function POST() {
     console.error("[api/redis]", message)
     return NextResponse.json({ error: message }, { status: 500 })
   }
+}
+
+export function GET() {
+  return NextResponse.json({ error: "Not found" }, { status: 404 })
 }

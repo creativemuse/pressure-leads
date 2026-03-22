@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk"
+import { Resend } from "resend"
 import { resolveContractorForLead } from "@/lib/contractor-redis"
-import twilio from "twilio"
 
 import { getFallbackContractorFromEnv } from "./fallback-contractor"
 
@@ -105,19 +105,27 @@ async function pinJsonToIpfs(payload: unknown, jwt: string): Promise<string> {
   return cid
 }
 
-async function formatLeadSms(anthropic: Anthropic, payload: unknown): Promise<string> {
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+}
+
+async function formatLeadNotificationLine(anthropic: Anthropic, payload: unknown): Promise<string> {
   const model = process.env.ANTHROPIC_MODEL ?? DEFAULT_ANTHROPIC_MODEL
   const text = JSON.stringify(payload)
   const message = await anthropic.messages.create({
     model,
     max_tokens: 512,
     system:
-      "You format CRM leads for SMS. Output a single short line only: professional, no markdown, no quotes. " +
+      "You format CRM leads for a short email notification. Output a single short line only: professional, no markdown, no quotes. " +
       "Include name, service need, city/area if present, and phone if present. Start with 'New Lead: ' when it fits.",
     messages: [
       {
         role: "user",
-        content: `Turn this Tally webhook JSON into one SMS line under 400 characters:\n\n${text}`,
+        content: `Turn this Tally webhook JSON into one notification line under 400 characters:\n\n${text}`,
       },
     ],
   })
@@ -128,12 +136,25 @@ async function formatLeadSms(anthropic: Anthropic, payload: unknown): Promise<st
   return line
 }
 
-function getTwilioClient() {
-  const sid = process.env.TWILIO_ACCOUNT_SID
-  const token = process.env.TWILIO_AUTH_TOKEN
-  const from = process.env.TWILIO_PHONE_NUMBER
-  if (!sid || !token || !from) throw new Error("Missing Twilio env (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER)")
-  return { client: twilio(sid, token), from }
+/** Uses `RESEND_API_KEY` / `RESEND_FROM`. In production, `RESEND_FROM` must be on a domain verified in Resend (not `onboarding@resend.dev`). */
+function getResendConfig() {
+  const key = process.env.RESEND_API_KEY?.trim()
+  const from = process.env.RESEND_FROM?.trim()
+  if (!key) throw new Error("Missing RESEND_API_KEY")
+  if (!from) throw new Error("Missing RESEND_FROM (verified sender; production: your domain in Resend)")
+  return { resend: new Resend(key), from }
+}
+
+async function sendLeadEmail(
+  resend: Resend,
+  from: string,
+  to: string,
+  subject: string,
+  bodyText: string,
+): Promise<void> {
+  const html = `<p style="white-space:pre-wrap">${escapeHtml(bodyText)}</p>`
+  const { error } = await resend.emails.send({ from, to, subject, html })
+  if (error) throw new Error(error.message)
 }
 
 /**
@@ -164,7 +185,7 @@ export async function runLeadPipeline(payload: unknown): Promise<void> {
   const ipfsCid = await pinJsonToIpfs(payload, pinataJwt)
   console.info("[tally-webhook] pinned", { ipfsCid, responseId })
 
-  const smsBody = await formatLeadSms(anthropic, payload)
+  const leadSummary = await formatLeadNotificationLine(anthropic, payload)
 
   const balanceUrl = `${crossmintBase}/2025-06-09/wallets/${encodedWallet}/balances?tokens=usdc&chains=${encodeURIComponent(chain)}`
   const balanceRes = await fetch(balanceUrl, { headers: crossmintHeaders() })
@@ -182,16 +203,12 @@ export async function runLeadPipeline(payload: unknown): Promise<void> {
 
   const funded = usdcDecimalStringGte(balanceStr, leadFee)
 
-  const { client: twilioClient, from: twilioFrom } = getTwilioClient()
-  const adminPhone = process.env.ADMIN_PHONE_NUMBER!.trim()
+  const { resend, from: resendFrom } = getResendConfig()
+  const adminEmail = process.env.ADMIN_EMAIL!.trim()
 
   if (!funded) {
-    const manualText = `MANUAL ROUTING REQUIRED: Contractor had insufficient USDC.\n${smsBody}`
-    await twilioClient.messages.create({
-      body: manualText.slice(0, 1600),
-      from: twilioFrom,
-      to: adminPhone,
-    })
+    const manualText = `MANUAL ROUTING REQUIRED: Contractor had insufficient USDC.\n${leadSummary}`
+    await sendLeadEmail(resend, resendFrom, adminEmail, "Pressure Leads: manual routing (insufficient USDC)", manualText)
     console.info("[tally-webhook] done", { responseId, routing: "admin", payment: "skipped", zip })
     return
   }
@@ -230,22 +247,18 @@ export async function runLeadPipeline(payload: unknown): Promise<void> {
     transferStatus === "awaiting_signature"
 
   if (needsManualApproval) {
-    await twilioClient.messages.create({
-      body: `MANUAL ROUTING REQUIRED: Lead fee transfer awaiting signer approval (${transferStatus}).\n${smsBody}`.slice(
-        0,
-        1600,
-      ),
-      from: twilioFrom,
-      to: adminPhone,
-    })
+    const manualText = `MANUAL ROUTING REQUIRED: Lead fee transfer awaiting signer approval (${transferStatus}).\n${leadSummary}`
+    await sendLeadEmail(
+      resend,
+      resendFrom,
+      adminEmail,
+      `Pressure Leads: manual routing (${transferStatus})`,
+      manualText,
+    )
     console.info("[tally-webhook] done", { responseId, routing: "admin", transferStatus, zip })
     return
   }
 
-  await twilioClient.messages.create({
-    body: smsBody.slice(0, 1600),
-    from: twilioFrom,
-    to: contractor.phoneE164,
-  })
+  await sendLeadEmail(resend, resendFrom, contractor.email, "New lead", leadSummary)
   console.info("[tally-webhook] done", { responseId, routing: "contractor", transferStatus, zip })
 }

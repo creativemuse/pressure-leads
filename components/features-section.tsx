@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react"
 
+/* Reserved animated demos for future feature tabs; keep names for lint until wired into the grid. */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 const AnimatedChatDemo = ({ isActive }: { isActive: boolean }) => {
   const [messages, setMessages] = useState([
     { text: "Hi! How can I help you today?", isBot: true, visible: false },
@@ -365,6 +367,8 @@ const AnimatedIntegrationsDemo = ({ isActive }: { isActive: boolean }) => {
     </div>
   )
 }
+
+/* eslint-enable @typescript-eslint/no-unused-vars */
 
 const DrivewayGifDemo = ({ isActive }: { isActive: boolean }) => {
   return (

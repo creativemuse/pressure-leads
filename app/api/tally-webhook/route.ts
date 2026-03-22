@@ -12,7 +12,8 @@ export const maxDuration = 60
 
 /**
  * Required: `TALLY_WEBHOOK_SECRET`, `PINATA_JWT`, `ANTHROPIC_API_KEY`, `CROSSMINT_API_KEY`,
- * `TWILIO_*`, `ADMIN_PHONE_NUMBER`, `LEAD_FEE_USDC`, `TREASURY_WALLET_ADDRESS`,
+ * `RESEND_API_KEY`, `RESEND_FROM` (production: address on a verified domain in Resend), `ADMIN_EMAIL`,
+ * `LEAD_FEE_USDC`, `TREASURY_WALLET_ADDRESS`,
  * `CONTRACTOR_FALLBACK_EMAIL`, `CONTRACTOR_FALLBACK_PHONE_E164` (E.164).
  * Optional: `CROSSMINT_PROJECT_ID`, `CROSSMINT_API_BASE`, `CROSSMINT_CHAIN`, `ANTHROPIC_MODEL`,
  * `CROSSMINT_TRANSFER_SIGNER`, Redis zip routing envs (`REDIS_URL`, `TALLY_ZIP_FIELD_*`).
@@ -38,10 +39,9 @@ function assertPipelineEnv(): void {
     "PINATA_JWT",
     "ANTHROPIC_API_KEY",
     "CROSSMINT_API_KEY",
-    "TWILIO_ACCOUNT_SID",
-    "TWILIO_AUTH_TOKEN",
-    "TWILIO_PHONE_NUMBER",
-    "ADMIN_PHONE_NUMBER",
+    "RESEND_API_KEY",
+    "RESEND_FROM",
+    "ADMIN_EMAIL",
     "LEAD_FEE_USDC",
     "TREASURY_WALLET_ADDRESS",
   ] as const
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
       ok: true,
       accepted: true,
       responseId: responseId ?? null,
-      note: "Lead processing runs asynchronously; check logs for Pinata/Crossmint/Twilio results.",
+      note: "Lead processing runs asynchronously; check logs for Pinata/Crossmint/Resend results.",
     },
     { status: 200 },
   )
