@@ -25,9 +25,21 @@ const siteDescription =
 
 const ogImagePath = "/images/before_after/home.png"
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000")
+/** Production custom domain — used for metadataBase when `NEXT_PUBLIC_SITE_URL` is unset (Vercel production only). */
+const CANONICAL_SITE_URL = "https://www.staugustinepressurewashingpros.com"
+
+function resolveSiteUrl(): string {
+  const fromEnv = process.env.NEXT_PUBLIC_SITE_URL?.trim()
+  if (fromEnv) return fromEnv.replace(/\/$/, "")
+
+  if (process.env.VERCEL_ENV === "production") return CANONICAL_SITE_URL
+
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+
+  return "http://localhost:3000"
+}
+
+const siteUrl = resolveSiteUrl()
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

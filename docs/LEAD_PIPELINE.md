@@ -46,7 +46,12 @@ Set `ADMIN_API_SECRET` (long random string). Send `Authorization: Bearer <secret
 - `GET /api/admin/lead-stats?zip=32092&date=2025-03-21` — `date` defaults to today (UTC). `zip` optional; when omitted, `countForZip` is null.
 - `POST /api/admin/contractor-pause` — JSON `{ "email": "pro@example.com", "paused": true | false }`
 
-If `ADMIN_API_SECRET` or `REDIS_URL` is missing, these routes return 503 / 401 as appropriate.
+**HTTP status:** Missing `ADMIN_API_SECRET` → **503** `Admin API not configured`. Wrong or missing Bearer token → **401** `Unauthorized`. Missing `REDIS_URL` → **503** `Redis not configured`. Validation uses `verifyAdminBearer` in `lib/admin-auth.ts` (constant-time compare; header must start with `Bearer `, not lowercase `bearer`).
+
+#### Troubleshooting 401 vs 503
+
+- **503** `Admin API not configured` — the deployment has no `ADMIN_API_SECRET` (or it is empty). Fix environment variables on the host, not the `Authorization` header format.
+- **401** `Unauthorized` — the route is running and a secret is set, but the token does not match. Use the same value as in the host env; in Postman use **Authorization → Bearer Token** so the `Authorization` header is formatted correctly. On Vercel, after changing `ADMIN_API_SECRET`, **redeploy** so the live app uses the new value. Avoid stray spaces when copying the secret.
 
 ## Env reference
 
