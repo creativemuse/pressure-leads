@@ -3,11 +3,17 @@ import { Resend } from "resend"
 import type { ContractorProfile } from "@/lib/contractor-redis"
 import { resolveContractorForLead } from "@/lib/contractor-redis"
 import { isEvmAddress } from "@/lib/evm-address"
+import { generateFollowUpMessage, sendConsumerFollowUp } from "@/lib/lead-followup"
+import { scoreLead, scoreLabel } from "@/lib/lead-scoring"
+import { createLeadRecord, updateLeadStatus } from "@/lib/lead-state"
 
 import { recordLeadProcessed } from "@/lib/lead-stats"
 
 import { getFallbackContractorFromEnv } from "./fallback-contractor"
-import { leadEmailBodyWithStructuredFacts } from "./pressure-washing-lead-fields"
+import {
+  extractPressureWashingLeadFromPayload,
+  leadEmailBodyWithStructuredFacts,
+} from "./pressure-washing-lead-fields"
 
 const DEFAULT_ANTHROPIC_MODEL = "claude-3-5-haiku-20241022"
 const DEFAULT_CROSSMINT_API_BASE = "https://www.crossmint.com/api"
@@ -246,7 +252,47 @@ export async function runLeadPipeline(payload: unknown): Promise<void> {
 
     currentStep = "claude-summarization"
     const leadSummary = await formatLeadNotificationLine(anthropic, payload)
-    const leadEmailBody = leadEmailBodyWithStructuredFacts(leadSummary, payload)
+
+    // --- Lead scoring & state ---
+    currentStep = "lead-scoring"
+    const leadFields = extractPressureWashingLeadFromPayload(payload)
+    const leadScore = scoreLead(leadFields)
+    const leadScoreTag = scoreLabel(leadScore)
+    console.info("[tally-webhook] scored", { score: leadScore, label: leadScoreTag, responseId })
+
+    currentStep = "lead-state-create"
+    const leadId = await createLeadRecord({
+      score: leadScore,
+      consumerEmail: leadFields.email,
+      zip: zip ?? undefined,
+      contractorEmail: contractor.email,
+      responseId,
+    })
+
+    // --- Consumer follow-up email (best-effort) ---
+    if (leadFields.email) {
+      currentStep = "consumer-followup"
+      try {
+        const { resend: followUpResend, from: followUpFrom } = getResendConfig()
+        const followUpBody = await generateFollowUpMessage(anthropic, leadFields)
+        await sendConsumerFollowUp({
+          resend: followUpResend,
+          from: followUpFrom,
+          consumerEmail: leadFields.email,
+          consumerName: leadFields.first_name,
+          followUpBody,
+        })
+        await updateLeadStatus(leadId, "contacted")
+        console.info("[tally-webhook] consumer follow-up sent", { leadId, consumerEmail: leadFields.email })
+      } catch (followUpErr) {
+        // Best-effort: log but don't fail the pipeline
+        console.error("[tally-webhook] consumer follow-up failed (non-fatal)", followUpErr)
+      }
+    }
+
+    // Include lead score in contractor email body
+    const scoreHeader = `Lead Score: ${leadScore}/10 (${leadScoreTag})\n`
+    const leadEmailBody = scoreHeader + leadEmailBodyWithStructuredFacts(leadSummary, payload)
 
     currentStep = "crossmint-balance-check"
     const balanceUrl = `${crossmintBase}/2025-06-09/wallets/${encodedWallet}/balances?tokens=usdc&chains=${encodeURIComponent(chain)}`
