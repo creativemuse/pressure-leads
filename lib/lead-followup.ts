@@ -40,12 +40,12 @@ export async function generateFollowUpMessage(
     model,
     max_tokens: 1024,
     system:
-      "You write friendly, professional follow-up emails for a pressure washing lead service. " +
-      "The email confirms we received the customer's request, references their specific details to show we're paying attention, " +
-      "sets expectations (a local contractor will reach out shortly), and keeps a warm, helpful tone. " +
-      "Output ONLY the email body text (no subject line, no greeting prefix like 'Subject:'). " +
-      "Start with a greeting using their first name if available. Keep it under 200 words. " +
-      "Do not use markdown formatting. Do not include any signatures or company names — those are added separately.",
+      `You write friendly, professional follow-up emails for a pressure washing lead service. ` +
+      `The email confirms we received the customer's request, references their specific details to show we're paying attention, ` +
+      `sets expectations (a local contractor will reach out shortly), and keeps a warm, helpful tone. ` +
+      `Output ONLY the email body text (no subject line, no greeting prefix like 'Subject:'). ` +
+      `Start with a greeting using their first name if available. Keep it under 200 words. ` +
+      `Do not use markdown formatting. Do not include any signatures or company names — those are added separately.`,
     messages: [
       {
         role: "user",

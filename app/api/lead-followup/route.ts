@@ -57,10 +57,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Lead has no consumer email for follow-up" }, { status: 422 })
     }
 
-    // Build minimal lead data from record for Claude context
-    const lead: PressureWashingLeadExtracted = {}
-    if (record.consumerEmail) lead.email = record.consumerEmail
-    if (record.zip) lead.zip = record.zip
+    // Use full stored lead data when available, fall back to minimal fields
+    const lead: PressureWashingLeadExtracted = record.leadData ?? {}
+    if (!lead.email && record.consumerEmail) lead.email = record.consumerEmail
+    if (!lead.zip && record.zip) lead.zip = record.zip
 
     try {
       const followUpBody = await generateFollowUpMessage(anthropic, lead)

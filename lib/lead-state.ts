@@ -1,6 +1,8 @@
 import { getRedis } from "@/lib/redis"
 import { randomUUID } from "crypto"
 
+import type { PressureWashingLeadExtracted } from "@/lib/tally-webhook/pressure-washing-lead-fields"
+
 export type LeadStatus = "new" | "contacted" | "qualified" | "converted"
 
 export type LeadRecord = {
@@ -11,6 +13,7 @@ export type LeadRecord = {
   zip?: string
   contractorEmail?: string
   responseId?: string
+  leadData?: PressureWashingLeadExtracted
   createdAt: string
   updatedAt: string
 }
@@ -35,6 +38,7 @@ export async function createLeadRecord(opts: {
   zip?: string
   contractorEmail?: string
   responseId?: string
+  leadData?: PressureWashingLeadExtracted
 }): Promise<string> {
   const id = opts.responseId ?? randomUUID()
   if (!process.env.REDIS_URL?.trim()) return id
@@ -48,19 +52,16 @@ export async function createLeadRecord(opts: {
     zip: opts.zip,
     contractorEmail: opts.contractorEmail,
     responseId: opts.responseId,
+    leadData: opts.leadData,
     createdAt: now,
     updatedAt: now,
   }
 
-  try {
-    const r = await getRedis()
-    const multi = r.multi()
-    multi.set(leadKey(id), record.status, { EX: LEAD_TTL })
-    multi.set(leadDataKey(id), JSON.stringify(record), { EX: LEAD_TTL })
-    await multi.exec()
-  } catch (e) {
-    console.error("[lead-state] create failed", e)
-  }
+  const r = await getRedis()
+  const multi = r.multi()
+  multi.set(leadKey(id), record.status, { EX: LEAD_TTL })
+  multi.set(leadDataKey(id), JSON.stringify(record), { EX: LEAD_TTL })
+  await multi.exec()
 
   return id
 }
@@ -75,9 +76,8 @@ export async function updateLeadStatus(id: string, status: LeadStatus): Promise<
     const r = await getRedis()
     const raw = await r.get(leadDataKey(id))
     if (!raw) {
-      // No data record, just set status key
-      await r.set(leadKey(id), status, { EX: LEAD_TTL })
-      return true
+      console.error(`[lead-state] update failed: no data record found for lead ${id}`)
+      return false
     }
 
     const record = JSON.parse(raw) as LeadRecord

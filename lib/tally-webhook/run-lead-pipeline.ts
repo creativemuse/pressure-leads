@@ -267,6 +267,7 @@ export async function runLeadPipeline(payload: unknown): Promise<void> {
       zip: zip ?? undefined,
       contractorEmail: contractor.email,
       responseId,
+      leadData: leadFields,
     })
 
     // --- Consumer follow-up email (best-effort) ---

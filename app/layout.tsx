@@ -30,7 +30,14 @@ const CANONICAL_SITE_URL = "https://www.staugustinepressurewashingpros.com"
 
 function resolveSiteUrl(): string {
   const fromEnv = process.env.NEXT_PUBLIC_SITE_URL?.trim()
-  if (fromEnv) return fromEnv.replace(/\/$/, "")
+  if (fromEnv) {
+    try {
+      new URL(fromEnv)
+      return fromEnv.replace(/\/$/, "")
+    } catch {
+      console.warn(`Invalid NEXT_PUBLIC_SITE_URL: "${fromEnv}". Falling back to default.`)
+    }
+  }
 
   if (process.env.VERCEL_ENV === "production") return CANONICAL_SITE_URL
 

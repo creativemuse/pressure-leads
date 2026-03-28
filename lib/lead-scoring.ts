@@ -33,7 +33,7 @@ export function scoreLead(lead: PressureWashingLeadExtracted): number {
     score += 1
   }
   // Multiple services requested
-  if ((services.match(/,/g) ?? []).length >= 2) {
+  if (services.includes(',')) {
     score += 1
   }
 
