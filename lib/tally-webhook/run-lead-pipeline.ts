@@ -3,11 +3,17 @@ import { Resend } from "resend"
 import type { ContractorProfile } from "@/lib/contractor-redis"
 import { resolveContractorForLead } from "@/lib/contractor-redis"
 import { isEvmAddress } from "@/lib/evm-address"
+import { generateFollowUpMessage, sendConsumerFollowUp } from "@/lib/lead-followup"
+import { scoreLead, scoreLabel } from "@/lib/lead-scoring"
+import { createLeadRecord, updateLeadStatus } from "@/lib/lead-state"
 
 import { recordLeadProcessed } from "@/lib/lead-stats"
 
 import { getFallbackContractorFromEnv } from "./fallback-contractor"
-import { leadEmailBodyWithStructuredFacts } from "./pressure-washing-lead-fields"
+import {
+  extractPressureWashingLeadFromPayload,
+  leadEmailBodyWithStructuredFacts,
+} from "./pressure-washing-lead-fields"
 
 const DEFAULT_ANTHROPIC_MODEL = "claude-3-5-haiku-20241022"
 const DEFAULT_CROSSMINT_API_BASE = "https://www.crossmint.com/api"
@@ -169,113 +175,210 @@ async function sendLeadEmail(
   if (error) throw new Error(error.message)
 }
 
+/** Attempts to send a pipeline failure alert to ADMIN_EMAIL. Best-effort; logs on failure. */
+async function sendPipelineFailureAlert(
+  step: string,
+  error: unknown,
+  responseId: string | undefined,
+  zip: string | null,
+  contractorEmail: string | null,
+): Promise<void> {
+  try {
+    const { resend, from: resendFrom } = getResendConfig()
+    const adminEmail = process.env.ADMIN_EMAIL?.trim()
+    if (!adminEmail) {
+      console.error("[tally-webhook] cannot send failure alert: ADMIN_EMAIL not set")
+      return
+    }
+    const errMsg = error instanceof Error ? error.message : String(error)
+    const details = [
+      `Step: ${step}`,
+      `Error: ${errMsg}`,
+      responseId ? `Tally Response ID: ${responseId}` : null,
+      zip ? `ZIP: ${zip}` : null,
+      contractorEmail ? `Contractor: ${contractorEmail}` : null,
+      `Time: ${new Date().toISOString()}`,
+    ]
+      .filter(Boolean)
+      .join("\n")
+    await sendLeadEmail(
+      resend,
+      resendFrom,
+      adminEmail,
+      `Pressure Leads: pipeline failure at "${step}"`,
+      `PIPELINE FAILURE — A lead could not be processed. Manual intervention required.\n\n${details}`,
+    )
+  } catch (alertErr) {
+    console.error("[tally-webhook] failed to send failure alert email", alertErr)
+  }
+}
+
 /**
- * Full lead processing after Tally returns 200. Errors are logged; use Vercel logs / alerts.
+ * Full lead processing after Tally returns 200.
+ * On failure, sends an alert email to ADMIN_EMAIL with the failure step and lead details.
  * See `docs/LEAD_PIPELINE.md` for Pinata IPFS vs Agents, Crossmint, and optional Redis lead stats.
  */
 export async function runLeadPipeline(payload: unknown): Promise<void> {
   const responseId = tallyResponseId(payload)
   const fallback = getFallbackContractorFromEnv()
+  let currentStep = "contractor-resolution"
+  let zip: string | null = null
+  let contractorEmail: string | null = null
 
-  const { contractor, zip } = await resolveContractorForLead(payload, {
-    email: fallback.email,
-    phoneE164: fallback.phoneE164,
-  })
-  console.info("[tally-webhook] contractor", { source: contractor.source, zip, responseId })
+  try {
+    const resolved = await resolveContractorForLead(payload, {
+      email: fallback.email,
+      phoneE164: fallback.phoneE164,
+    })
+    const contractor = resolved.contractor
+    zip = resolved.zip
+    contractorEmail = contractor.email
+    console.info("[tally-webhook] contractor", { source: contractor.source, zip, responseId })
 
-  const pinataJwt = process.env.PINATA_JWT!
-  const leadFee = process.env.LEAD_FEE_USDC!.trim()
-  const treasury = process.env.TREASURY_WALLET_ADDRESS!.trim()
-  const crossmintBase = (process.env.CROSSMINT_API_BASE ?? DEFAULT_CROSSMINT_API_BASE).replace(/\/$/, "")
-  const chain = (process.env.CROSSMINT_CHAIN ?? DEFAULT_CROSSMINT_CHAIN).trim()
-  const tokenLocator = `${chain}:usdc`
-  const contractorEmail = contractor.email
-  const walletSeg = crossmintWalletPathSegment(contractor)
-  const encodedWallet = encodeURIComponent(walletSeg)
+    const pinataJwt = process.env.PINATA_JWT!
+    const leadFee = process.env.LEAD_FEE_USDC!.trim()
+    const treasury = process.env.TREASURY_WALLET_ADDRESS!.trim()
+    const crossmintBase = (process.env.CROSSMINT_API_BASE ?? DEFAULT_CROSSMINT_API_BASE).replace(/\/$/, "")
+    const chain = (process.env.CROSSMINT_CHAIN ?? DEFAULT_CROSSMINT_CHAIN).trim()
+    const tokenLocator = `${chain}:usdc`
+    const walletSeg = crossmintWalletPathSegment(contractor)
+    const encodedWallet = encodeURIComponent(walletSeg)
 
-  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
+    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
 
-  const ipfsCid = await pinJsonToIpfs(payload, pinataJwt)
-  console.info("[tally-webhook] pinned", { ipfsCid, responseId })
+    currentStep = "ipfs-pinning"
+    const ipfsCid = await pinJsonToIpfs(payload, pinataJwt)
+    console.info("[tally-webhook] pinned", { ipfsCid, responseId })
 
-  const leadSummary = await formatLeadNotificationLine(anthropic, payload)
-  const leadEmailBody = leadEmailBodyWithStructuredFacts(leadSummary, payload)
+    currentStep = "claude-summarization"
+    const leadSummary = await formatLeadNotificationLine(anthropic, payload)
 
-  const balanceUrl = `${crossmintBase}/2025-06-09/wallets/${encodedWallet}/balances?tokens=usdc&chains=${encodeURIComponent(chain)}`
-  const balanceRes = await fetch(balanceUrl, { headers: crossmintHeaders() })
-  const balanceJson: unknown = await balanceRes.json().catch(() => ({}))
-  if (!balanceRes.ok) {
-    console.error("[tally-webhook] crossmint balance", balanceRes.status, JSON.stringify(balanceJson).slice(0, 300))
-    throw new Error("Crossmint balance request failed")
-  }
+    // --- Lead scoring & state ---
+    currentStep = "lead-scoring"
+    const leadFields = extractPressureWashingLeadFromPayload(payload)
+    const leadScore = scoreLead(leadFields)
+    const leadScoreTag = scoreLabel(leadScore)
+    console.info("[tally-webhook] scored", { score: leadScore, label: leadScoreTag, responseId })
 
-  const balanceStr = extractUsdcBalance(balanceJson)
-  if (balanceStr == null) {
-    console.error("[tally-webhook] could not parse USDC balance", JSON.stringify(balanceJson).slice(0, 400))
-    throw new Error("Could not read USDC balance")
-  }
+    currentStep = "lead-state-create"
+    const leadId = await createLeadRecord({
+      score: leadScore,
+      consumerEmail: leadFields.email,
+      zip: zip ?? undefined,
+      contractorEmail: contractor.email,
+      responseId,
+    })
 
-  const funded = usdcDecimalStringGte(balanceStr, leadFee)
+    // --- Consumer follow-up email (best-effort) ---
+    if (leadFields.email) {
+      currentStep = "consumer-followup"
+      try {
+        const { resend: followUpResend, from: followUpFrom } = getResendConfig()
+        const followUpBody = await generateFollowUpMessage(anthropic, leadFields)
+        await sendConsumerFollowUp({
+          resend: followUpResend,
+          from: followUpFrom,
+          consumerEmail: leadFields.email,
+          consumerName: leadFields.first_name,
+          followUpBody,
+        })
+        await updateLeadStatus(leadId, "contacted")
+        console.info("[tally-webhook] consumer follow-up sent", { leadId, consumerEmail: leadFields.email })
+      } catch (followUpErr) {
+        // Best-effort: log but don't fail the pipeline
+        console.error("[tally-webhook] consumer follow-up failed (non-fatal)", followUpErr)
+      }
+    }
 
-  const { resend, from: resendFrom } = getResendConfig()
-  const adminEmail = process.env.ADMIN_EMAIL!.trim()
+    // Include lead score in contractor email body
+    const scoreHeader = `Lead Score: ${leadScore}/10 (${leadScoreTag})\n`
+    const leadEmailBody = scoreHeader + leadEmailBodyWithStructuredFacts(leadSummary, payload)
 
-  if (!funded) {
-    const manualText = `MANUAL ROUTING REQUIRED: Contractor had insufficient USDC.\n${leadEmailBody}`
-    await sendLeadEmail(resend, resendFrom, adminEmail, "Pressure Leads: manual routing (insufficient USDC)", manualText)
+    currentStep = "crossmint-balance-check"
+    const balanceUrl = `${crossmintBase}/2025-06-09/wallets/${encodedWallet}/balances?tokens=usdc&chains=${encodeURIComponent(chain)}`
+    const balanceRes = await fetch(balanceUrl, { headers: crossmintHeaders() })
+    const balanceJson: unknown = await balanceRes.json().catch(() => ({}))
+    if (!balanceRes.ok) {
+      console.error("[tally-webhook] crossmint balance", balanceRes.status, JSON.stringify(balanceJson).slice(0, 300))
+      throw new Error(`Crossmint balance request failed (HTTP ${balanceRes.status})`)
+    }
+
+    const balanceStr = extractUsdcBalance(balanceJson)
+    if (balanceStr == null) {
+      console.error("[tally-webhook] could not parse USDC balance", JSON.stringify(balanceJson).slice(0, 400))
+      throw new Error("Could not read USDC balance from Crossmint response")
+    }
+
+    const funded = usdcDecimalStringGte(balanceStr, leadFee)
+
+    const { resend, from: resendFrom } = getResendConfig()
+    const adminEmail = process.env.ADMIN_EMAIL!.trim()
+
+    if (!funded) {
+      currentStep = "admin-email-insufficient-funds"
+      const manualText = `MANUAL ROUTING REQUIRED: Contractor had insufficient USDC.\n${leadEmailBody}`
+      await sendLeadEmail(resend, resendFrom, adminEmail, "Pressure Leads: manual routing (insufficient USDC)", manualText)
+      await recordLeadProcessed(zip)
+      console.info("[tally-webhook] done", { responseId, routing: "admin", payment: "skipped", zip })
+      return
+    }
+
+    currentStep = "crossmint-transfer"
+    const signer = process.env.CROSSMINT_TRANSFER_SIGNER?.trim() || `email:${contractorEmail}`
+
+    const transferUrl = `${crossmintBase}/2025-06-09/wallets/${encodedWallet}/tokens/${encodeURIComponent(tokenLocator)}/transfers`
+    const idempotencyKey = responseId ? `tally-${responseId}` : `tally-${ipfsCid.slice(0, 16)}`
+
+    const transferHeaders: Record<string, string> = {
+      ...crossmintHeaders(),
+      "x-idempotency-key": idempotencyKey,
+    }
+
+    const transferRes = await fetch(transferUrl, {
+      method: "POST",
+      headers: transferHeaders,
+      body: JSON.stringify({
+        recipient: treasury,
+        amount: leadFee,
+        signer,
+      }),
+    })
+
+    const transferJson = (await transferRes.json().catch(() => ({}))) as { status?: string }
+    const transferStatus = transferJson?.status
+
+    if (!transferRes.ok) {
+      console.error("[tally-webhook] crossmint transfer failed", transferRes.status, JSON.stringify(transferJson).slice(0, 400))
+      throw new Error(`Crossmint transfer failed (HTTP ${transferRes.status})`)
+    }
+
+    const needsManualApproval =
+      transferStatus === "awaiting-approval" ||
+      transferStatus === "pending-approval" ||
+      transferStatus === "awaiting_signature"
+
+    if (needsManualApproval) {
+      currentStep = "admin-email-manual-approval"
+      const manualText = `MANUAL ROUTING REQUIRED: Lead fee transfer awaiting signer approval (${transferStatus}).\n${leadEmailBody}`
+      await sendLeadEmail(
+        resend,
+        resendFrom,
+        adminEmail,
+        `Pressure Leads: manual routing (${transferStatus})`,
+        manualText,
+      )
+      await recordLeadProcessed(zip)
+      console.info("[tally-webhook] done", { responseId, routing: "admin", transferStatus, zip })
+      return
+    }
+
+    currentStep = "contractor-email"
+    await sendLeadEmail(resend, resendFrom, contractor.email, "New lead", leadEmailBody)
     await recordLeadProcessed(zip)
-    console.info("[tally-webhook] done", { responseId, routing: "admin", payment: "skipped", zip })
-    return
+    console.info("[tally-webhook] done", { responseId, routing: "contractor", transferStatus, zip })
+  } catch (err) {
+    console.error("[tally-webhook] pipeline failed", { step: currentStep, responseId, zip }, err)
+    await sendPipelineFailureAlert(currentStep, err, responseId, zip, contractorEmail)
+    throw err
   }
-
-  const signer = process.env.CROSSMINT_TRANSFER_SIGNER?.trim() || `email:${contractorEmail}`
-
-  const transferUrl = `${crossmintBase}/2025-06-09/wallets/${encodedWallet}/tokens/${encodeURIComponent(tokenLocator)}/transfers`
-  const idempotencyKey = responseId ? `tally-${responseId}` : `tally-${ipfsCid.slice(0, 16)}`
-
-  const transferHeaders: Record<string, string> = {
-    ...crossmintHeaders(),
-    "x-idempotency-key": idempotencyKey,
-  }
-
-  const transferRes = await fetch(transferUrl, {
-    method: "POST",
-    headers: transferHeaders,
-    body: JSON.stringify({
-      recipient: treasury,
-      amount: leadFee,
-      signer,
-    }),
-  })
-
-  const transferJson = (await transferRes.json().catch(() => ({}))) as { status?: string }
-  const transferStatus = transferJson?.status
-
-  if (!transferRes.ok) {
-    console.error("[tally-webhook] crossmint transfer failed", transferRes.status, JSON.stringify(transferJson).slice(0, 400))
-    throw new Error("Crossmint transfer failed")
-  }
-
-  const needsManualApproval =
-    transferStatus === "awaiting-approval" ||
-    transferStatus === "pending-approval" ||
-    transferStatus === "awaiting_signature"
-
-  if (needsManualApproval) {
-    const manualText = `MANUAL ROUTING REQUIRED: Lead fee transfer awaiting signer approval (${transferStatus}).\n${leadEmailBody}`
-    await sendLeadEmail(
-      resend,
-      resendFrom,
-      adminEmail,
-      `Pressure Leads: manual routing (${transferStatus})`,
-      manualText,
-    )
-    await recordLeadProcessed(zip)
-    console.info("[tally-webhook] done", { responseId, routing: "admin", transferStatus, zip })
-    return
-  }
-
-  await sendLeadEmail(resend, resendFrom, contractor.email, "New lead", leadEmailBody)
-  await recordLeadProcessed(zip)
-  console.info("[tally-webhook] done", { responseId, routing: "contractor", transferStatus, zip })
 }
