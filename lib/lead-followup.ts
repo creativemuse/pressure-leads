@@ -13,14 +13,34 @@ function escapeHtml(s: string): string {
     .replace(/"/g, "&quot;")
 }
 
+function generateFollowUpTemplate(lead: PressureWashingLeadExtracted): string {
+  const greeting = lead.first_name ? `Hi ${lead.first_name},` : "Hi there,"
+  const serviceDetail = lead.services_needed
+    ? ` for ${lead.services_needed.toLowerCase()}`
+    : ""
+  const locationDetail = lead.city
+    ? ` in ${lead.city}${lead.state ? `, ${lead.state}` : ""}`
+    : ""
+
+  return [
+    greeting,
+    "",
+    `Thank you for submitting your pressure washing request${serviceDetail}${locationDetail}. We've received your information and a local contractor will be reaching out to you shortly to discuss your project and provide a quote.`,
+    "",
+    "If you have any questions in the meantime, feel free to reply to this email.",
+  ].join("\n")
+}
+
 /**
- * Uses Claude to generate a personalized, conversational follow-up email
- * for a consumer who just submitted a lead form.
+ * Uses Claude to generate a personalized follow-up email when available,
+ * otherwise falls back to a template-based message.
  */
 export async function generateFollowUpMessage(
-  anthropic: Anthropic,
+  anthropic: Anthropic | null,
   lead: PressureWashingLeadExtracted,
 ): Promise<string> {
+  if (!anthropic) return generateFollowUpTemplate(lead)
+
   const model = process.env.ANTHROPIC_MODEL ?? DEFAULT_ANTHROPIC_MODEL
 
   const leadContext = [

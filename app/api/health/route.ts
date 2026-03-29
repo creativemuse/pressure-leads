@@ -40,7 +40,6 @@ function checkPipelineEnv(): { configured: boolean; missing: string[] } {
   const required = [
     "TALLY_WEBHOOK_SECRET",
     "PINATA_JWT",
-    "ANTHROPIC_API_KEY",
     "CROSSMINT_API_KEY",
     "RESEND_API_KEY",
     "RESEND_FROM",

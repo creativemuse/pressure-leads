@@ -12,11 +12,12 @@ export const runtime = "nodejs"
 export const maxDuration = 60
 
 /**
- * Required: `TALLY_WEBHOOK_SECRET`, `PINATA_JWT`, `ANTHROPIC_API_KEY`, `CROSSMINT_API_KEY`,
+ * Required: `TALLY_WEBHOOK_SECRET`, `PINATA_JWT`, `CROSSMINT_API_KEY`,
  * `RESEND_API_KEY`, `RESEND_FROM` (production: address on a verified domain in Resend), `ADMIN_EMAIL`,
  * `LEAD_FEE_USDC`, `TREASURY_WALLET_ADDRESS`,
  * `CONTRACTOR_FALLBACK_EMAIL`, `CONTRACTOR_FALLBACK_PHONE_E164` (E.164).
- * Optional: `CROSSMINT_PROJECT_ID`, `CROSSMINT_API_BASE`, `CROSSMINT_CHAIN`, `ANTHROPIC_MODEL`,
+ * Optional: `ANTHROPIC_API_KEY` (enables AI-generated emails; template fallback when absent),
+ * `CROSSMINT_PROJECT_ID`, `CROSSMINT_API_BASE`, `CROSSMINT_CHAIN`, `ANTHROPIC_MODEL`,
  * `CROSSMINT_TRANSFER_SIGNER`, Redis zip routing envs (`REDIS_URL`, `TALLY_ZIP_FIELD_*`, optional `TALLY_LEAD_*_KEY`).
  *
  * Architecture (Pinata IPFS vs Agents, Crossmint, ops API): see `docs/LEAD_PIPELINE.md`.
@@ -36,7 +37,6 @@ function tallyResponseId(payload: unknown): string | undefined {
 function assertPipelineEnv(): void {
   const required = [
     "PINATA_JWT",
-    "ANTHROPIC_API_KEY",
     "CROSSMINT_API_KEY",
     "RESEND_API_KEY",
     "RESEND_FROM",

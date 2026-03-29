@@ -131,7 +131,21 @@ function escapeHtml(s: string): string {
     .replace(/"/g, "&quot;")
 }
 
-async function formatLeadNotificationLine(anthropic: Anthropic, payload: unknown): Promise<string> {
+function formatLeadNotificationLineFromTemplate(payload: unknown): string {
+  const fields = extractPressureWashingLeadFromPayload(payload)
+  const name = [fields.first_name, fields.last_name].filter(Boolean).join(" ").trim()
+  const parts = [
+    name ? `New Lead: ${name}` : "New Lead",
+    fields.services_needed ? `needs ${fields.services_needed}` : null,
+    fields.city ? `in ${fields.city}${fields.state ? `, ${fields.state}` : ""}` : null,
+    fields.phone ? `— ${fields.phone}` : null,
+  ].filter(Boolean)
+  return parts.join(" ")
+}
+
+async function formatLeadNotificationLine(anthropic: Anthropic | null, payload: unknown): Promise<string> {
+  if (!anthropic) return formatLeadNotificationLineFromTemplate(payload)
+
   const model = process.env.ANTHROPIC_MODEL ?? DEFAULT_ANTHROPIC_MODEL
   const text = JSON.stringify(payload)
   const message = await anthropic.messages.create({
@@ -244,7 +258,9 @@ export async function runLeadPipeline(payload: unknown): Promise<void> {
     const walletSeg = crossmintWalletPathSegment(contractor)
     const encodedWallet = encodeURIComponent(walletSeg)
 
-    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
+    const anthropicKey = process.env.ANTHROPIC_API_KEY?.trim()
+    const anthropic = anthropicKey ? new Anthropic({ apiKey: anthropicKey }) : null
+    if (!anthropic) console.info("[tally-webhook] ANTHROPIC_API_KEY not set; using template fallbacks")
 
     currentStep = "ipfs-pinning"
     const ipfsCid = await pinJsonToIpfs(payload, pinataJwt)
