@@ -37,12 +37,13 @@ const footerLinks: FooterSection[] = [
       { title: "Ponte Vedra", href: "/locations/ponte-vedra" },
       { title: "Palm Coast", href: "/locations/palm-coast" },
       { title: "St. Augustine Beach", href: "/locations/st-augustine-beach" },
+      { title: "St. Augustine", href: "/locations/st-augustine" },
     ],
   },
   {
     label: "Company",
     links: [
-      { title: "About", href: "/#about" },
+      { title: "About", href: "/about" },
       { title: "Testimonials", href: "/#testimonials" },
       { title: "Sun\u2013Sat \u00b7 24 hours" },
     ],

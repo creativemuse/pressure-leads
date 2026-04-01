@@ -275,6 +275,59 @@ export const locations: LocationData[] = [
       },
     ],
   },
+  {
+    slug: "st-augustine",
+    city: "St. Augustine",
+    title: "Pressure Washing in St. Augustine, FL | St. Augustine Pressure Washing Pros",
+    metaDescription:
+      "Professional pressure washing in St. Augustine, FL. Local experts serving the Nation's Oldest City. House washing, driveways, roofs, patios, and commercial properties. Free quotes.",
+    heroImage: "/images/before_after/home.jpg",
+    heroImageAlt: "Professional pressure washing service restoring a historic property in St. Augustine, Florida",
+    h1: "Pressure Washing Services in St. Augustine, FL",
+    intro:
+      "St. Augustine is where we started — and it's the community we know best. As the oldest city in the United States, St. Augustine combines historic charm with coastal living, and both bring unique challenges for property maintenance. From the coquina walls of the historic district to modern subdivisions in World Golf Village, our team delivers expert pressure washing tailored to St. Augustine's diverse architecture and demanding coastal climate. We're your neighbors, and we take pride in helping keep this beautiful city looking its best.",
+    sections: [
+      {
+        heading: "What Is Pressure Washing and Why Does St. Augustine Need It?",
+        body: "Pressure washing uses high-pressure water — and in some cases, low-pressure soft washing with specialized cleaning solutions — to remove dirt, mold, mildew, algae, and stains from exterior surfaces. In St. Augustine, the combination of ocean humidity, salt air, frequent rain, and subtropical heat creates an environment where organic growth thrives on every outdoor surface. Driveways turn black with algae, roofs streak within a few years, and siding develops green mold on shaded sides. Professional pressure washing removes these contaminants, restores your property's appearance, and prevents the long-term damage that unchecked growth causes to concrete, wood, shingles, and painted surfaces.",
+      },
+      {
+        heading: "Serving Every St. Augustine Neighborhood",
+        body: "We serve all of St. Augustine proper, from the historic downtown district to the growing communities west of I-95. Our service area includes Downtown St. Augustine, Davis Shores, Lincolnville, Anastasia Island, Vilano Beach, World Golf Village, Palencia, Julington Creek, Fruit Cove, St. Augustine Shores, Hastings, and all surrounding St. Johns County communities. Whether you own a historic home near the Castillo de San Marcos, a family home in World Golf Village, or a commercial property on US-1, we bring the same level of expertise and care to every job.",
+      },
+      {
+        heading: "Why Choose a Local St. Augustine Pressure Washing Company?",
+        body: "Hiring a local team means faster response times, familiarity with local building materials and HOA requirements, and accountability within the community. We understand the specific challenges St. Augustine properties face — from the salt exposure on Anastasia Island to the heavy tree canopy in older neighborhoods. We know which surfaces need soft washing versus high-pressure cleaning, and we adjust our approach for the coquina, stucco, wood, and brick common in this area. Our reputation is built on the quality of our work right here in St. Augustine, and every satisfied customer is a neighbor.",
+      },
+    ],
+    landmarks: [
+      "Castillo de San Marcos",
+      "St. George Street",
+      "Flagler College",
+      "St. Augustine Lighthouse",
+      "World Golf Village",
+      "Fort Matanzas",
+    ],
+    serviceArea:
+      "We serve all of St. Augustine and St. Johns County including Downtown, Davis Shores, Anastasia Island, Vilano Beach, World Golf Village, Palencia, St. Augustine Shores, Hastings, and surrounding areas.",
+    faqs: [
+      {
+        question: "What areas of St. Augustine do you serve?",
+        answer:
+          "We serve all of St. Augustine and greater St. Johns County, including Downtown, Davis Shores, Lincolnville, Anastasia Island, Vilano Beach, World Golf Village, Palencia, Julington Creek, Fruit Cove, St. Augustine Shores, and Hastings.",
+      },
+      {
+        question: "Can you pressure wash historic properties in St. Augustine?",
+        answer:
+          "Yes. We have experience cleaning historic homes and buildings, including coquina and tabby surfaces. We use low-pressure soft washing on delicate materials to clean effectively without causing damage to historic finishes.",
+      },
+      {
+        question: "How often should St. Augustine homeowners schedule pressure washing?",
+        answer:
+          "We recommend at least once per year for most properties. Homes near the coast, under heavy tree canopy, or in high-humidity areas may benefit from cleaning every 6 to 9 months to stay ahead of organic growth.",
+      },
+    ],
+  },
 ]
 
 export function getLocationBySlug(slug: string): LocationData | undefined {

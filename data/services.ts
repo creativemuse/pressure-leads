@@ -1,3 +1,8 @@
+export interface PricingItem {
+  label: string
+  range: string
+}
+
 export interface ServiceData {
   slug: string
   name: string
@@ -10,6 +15,7 @@ export interface ServiceData {
   sections: { heading: string; body: string }[]
   faqs: { question: string; answer: string }[]
   ctaText: string
+  pricing?: PricingItem[]
 }
 
 export const services: ServiceData[] = [
@@ -26,15 +32,15 @@ export const services: ServiceData[] = [
       "Your driveway is the first thing visitors see when they arrive at your home. Over time, Florida's heat and humidity cause oil stains, tire marks, algae, and ground-in dirt to build up on concrete, pavers, and brick surfaces. Our professional driveway pressure washing service restores your driveway to like-new condition, boosting your curb appeal and protecting your investment.",
     sections: [
       {
-        heading: "Why Your Driveway Needs Professional Cleaning",
+        heading: "Why Does My Driveway Get So Dirty in Florida?",
         body: "St. Augustine's subtropical climate accelerates the growth of mold, mildew, and algae on concrete and paver surfaces. These organisms don't just look unsightly \u2014 they create slippery conditions that can be a safety hazard for your family and guests. Oil and automotive fluid stains seep into porous concrete, becoming harder to remove the longer they sit. Professional pressure washing uses commercial-grade equipment and the right pressure settings to lift stains without damaging your driveway surface. We adjust our approach based on your driveway material \u2014 whether it's stamped concrete, exposed aggregate, brick pavers, or standard concrete \u2014 to deliver the best results safely.",
       },
       {
-        heading: "Our Driveway Cleaning Process",
+        heading: "How Does Professional Driveway Pressure Washing Work?",
         body: "We start with a thorough inspection to identify stain types and surface material. Next, we pre-treat oil stains and organic growth with eco-friendly cleaning solutions. Our commercial-grade pressure washers deliver precisely calibrated water pressure to strip away years of buildup without etching or damaging the surface. We pay special attention to expansion joints and edges where dirt accumulates. The result is a uniformly clean surface that looks freshly poured. For paver driveways, we can also re-sand joints after cleaning to prevent weed growth and maintain structural integrity.",
       },
       {
-        heading: "Protect Your Investment",
+        heading: "Does Pressure Washing Extend My Driveway's Lifespan?",
         body: "A clean driveway does more than improve your home's appearance. Regular pressure washing prevents the long-term damage that algae and embedded dirt cause to concrete surfaces. Algae roots can penetrate porous materials, leading to cracks and spalling over time. By scheduling regular cleanings, you extend the lifespan of your driveway and avoid costly repairs or replacement. Most homeowners in St. Augustine benefit from a professional driveway cleaning once or twice a year to keep their surfaces in top condition.",
       },
     ],
@@ -61,6 +67,9 @@ export const services: ServiceData[] = [
       },
     ],
     ctaText: "Get a Free Driveway Cleaning Quote",
+    pricing: [
+      { label: "Most residential driveways", range: "$150–$350" },
+    ],
   },
   {
     slug: "house-washing",
@@ -75,15 +84,15 @@ export const services: ServiceData[] = [
       "Your home's exterior takes a beating from Florida's sun, rain, and humidity year-round. Mold, mildew, pollen, and dirt gradually coat your siding, stucco, and trim, making your home look older than it is. Our professional house washing service uses safe, low-pressure soft washing techniques to restore your home's exterior without risking damage to siding, paint, or landscaping.",
     sections: [
       {
-        heading: "Soft Washing vs. Pressure Washing for Your Home",
+        heading: "What Is Soft Washing and How Is It Different from Pressure Washing?",
         body: "Unlike driveways and concrete, your home's exterior surfaces require a gentler approach. High-pressure washing can force water behind siding, damage paint, and even crack stucco. That's why we use soft washing \u2014 a method that combines low-pressure water with professional-grade cleaning solutions to kill mold, mildew, and algae at the root. The cleaning agents do the heavy lifting, and the low-pressure rinse safely removes all residue. This approach is safe for vinyl siding, Hardie board, stucco, painted wood, brick, and stone exteriors.",
       },
       {
-        heading: "What We Clean",
+        heading: "What Parts of My House Can Be Soft Washed?",
         body: "Our house washing service covers your entire exterior: all sides of the home from foundation to roofline, soffits and fascia, gutters (exterior), window frames, and trim. We take care to protect your landscaping, outdoor furniture, and light fixtures during the process. Our cleaning solutions are biodegradable and safe for plants and pets once dry. If you have delicate plantings near the foundation, we'll pre-wet them and cover them during treatment.",
       },
       {
-        heading: "The Difference a Clean Exterior Makes",
+        heading: "How Often Should I Have My House Washed in Florida?",
         body: "A professional house wash transforms your home's appearance instantly. Neighbors will ask if you repainted. Beyond aesthetics, removing mold and mildew protects your siding from the long-term damage these organisms cause. Mold can penetrate porous materials and lead to wood rot on trim and fascia boards. Regular house washing is one of the most cost-effective ways to maintain your home's value and avoid expensive repairs. In St. Augustine's coastal environment, we recommend a full house wash at least once a year.",
       },
     ],
@@ -110,6 +119,9 @@ export const services: ServiceData[] = [
       },
     ],
     ctaText: "Get a Free House Washing Quote",
+    pricing: [
+      { label: "Most single-family homes", range: "$250–$500" },
+    ],
   },
   {
     slug: "roof-soft-wash",
@@ -124,15 +136,15 @@ export const services: ServiceData[] = [
       "Those dark streaks running down your roof aren't just dirt \u2014 they're Gloeocapsa magma, a type of algae that feeds on the limestone filler in asphalt shingles. Left untreated, this algae shortens your roof's lifespan and drives up cooling costs by reducing your roof's ability to reflect heat. Our roof soft washing service safely eliminates algae, moss, and lichen without the damaging high pressure that voids manufacturer warranties.",
     sections: [
       {
-        heading: "Why Roof Cleaning Matters",
+        heading: "What Causes Black Streaks on My Roof?",
         body: "A dirty roof isn't just an eyesore \u2014 it's actively degrading. Algae and moss retain moisture against your shingles, accelerating granule loss and shortening roof life by years. Dark streaks absorb more heat, which can increase your attic temperature and raise your cooling bills during Florida's long summers. Many homeowner associations in St. Augustine require roofs to be kept clean, and a stained roof can trigger violation notices. Roof soft washing restores your roof's appearance and performance, protecting one of your home's most expensive components.",
       },
       {
-        heading: "Our Safe Soft Wash Process",
+        heading: "How Does Roof Soft Washing Work Without Damaging Shingles?",
         body: "We never use high pressure on roofs. Our soft wash process applies a specialized cleaning solution at low pressure that kills algae, moss, and lichen down to the root. The solution is applied evenly across the roof surface and allowed to dwell before a gentle rinse. This method is approved by shingle manufacturers including GAF, CertainTeed, and Owens Corning \u2014 unlike pressure washing, which can void your warranty by stripping protective granules. We clean asphalt shingle, tile, metal, and flat roofs, adjusting our approach and solutions for each material.",
       },
       {
-        heading: "Results That Last",
+        heading: "How Long Does a Roof Stay Clean After Soft Washing?",
         body: "Our roof soft wash doesn't just clean the surface \u2014 it kills the organisms causing the stains. This means your roof stays cleaner longer compared to methods that only remove surface discoloration. Most roofs stay visibly clean for 2 to 3 years after our treatment. We also offer maintenance plans for homeowners who want to keep their roof in peak condition year-round. A clean roof enhances curb appeal, maintains property value, and ensures your roof performs as designed for its full expected lifespan.",
       },
     ],
@@ -159,6 +171,9 @@ export const services: ServiceData[] = [
       },
     ],
     ctaText: "Get a Free Roof Cleaning Quote",
+    pricing: [
+      { label: "Roof replacement (avoided with cleaning)", range: "$8,000–$20,000+" },
+    ],
   },
   {
     slug: "patio-deck-cleaning",
@@ -173,15 +188,15 @@ export const services: ServiceData[] = [
       "Your patio and deck are where you relax, entertain, and enjoy Florida's outdoor lifestyle. But constant exposure to sun, rain, humidity, and foot traffic takes its toll. Algae makes surfaces dangerously slippery. Mold and mildew discolor wood and composite materials. Ground-in dirt dulls the finish of concrete and pavers. Our professional cleaning service restores your outdoor living spaces so they look and feel like new again.",
     sections: [
       {
-        heading: "Safe Cleaning for Every Surface",
+        heading: "Can You Pressure Wash a Wood Deck Without Damaging It?",
         body: "Patios and decks come in many materials, and each requires a different cleaning approach. We adjust pressure, nozzle selection, and cleaning solutions based on your surface. Wood decks get a lower-pressure wash with wood-safe cleaners that brighten without raising the grain. Composite decking is cleaned with manufacturer-approved methods. Concrete patios and pool decks handle higher pressure for deep cleaning. Paver patios are cleaned and optionally re-sanded. Whatever your outdoor surface, we have the right technique to clean it safely and effectively.",
       },
       {
-        heading: "Restore Your Outdoor Living Space",
+        heading: "What Difference Does a Clean Patio or Deck Make?",
         body: "A clean deck or patio completely transforms your outdoor area. Grayed, weathered wood regains its natural warm tone. Concrete surfaces go from dull and stained to bright and uniform. Pavers reveal their original color and pattern. Beyond appearance, cleaning removes the slippery algae and mold that make outdoor surfaces a slip hazard \u2014 especially around pool decks. If you're planning to stain or seal your deck, professional pressure washing is the essential first step for proper adhesion.",
       },
       {
-        heading: "Maintenance Tips for Northeast Florida",
+        heading: "How Often Should I Clean My Deck or Patio in Northeast Florida?",
         body: "St. Augustine's climate means your outdoor surfaces need regular attention. We recommend professional cleaning every 6 to 12 months for most decks and patios. Shaded areas and surfaces near pools or sprinklers may need more frequent cleaning. Between professional washes, you can keep your surfaces looking good by sweeping regularly, clearing debris from between deck boards, and addressing spills promptly. After cleaning, consider having your wood deck sealed or stained to extend the time between professional cleanings.",
       },
     ],
@@ -208,6 +223,12 @@ export const services: ServiceData[] = [
       },
     ],
     ctaText: "Get a Free Patio & Deck Cleaning Quote",
+    pricing: [
+      { label: "Wood deck cleaning", range: "$1.00–$2.50 per sq ft" },
+      { label: "Concrete patio cleaning", range: "$0.75–$1.50 per sq ft" },
+      { label: "Paver cleaning and re-sanding", range: "$1.50–$3.00 per sq ft" },
+      { label: "Most patios and decks", range: "$200–$600" },
+    ],
   },
   {
     slug: "fence-cleaning",
@@ -222,15 +243,15 @@ export const services: ServiceData[] = [
       "Your fence frames your property and contributes to its overall curb appeal. Over time, Florida's weather turns white vinyl fences green with algae and grays out natural wood. Mold and mildew coat fence boards, and dirt splashes up from the ground during rain. Our professional fence cleaning service restores both wood and vinyl fences to their original appearance, making your entire property look well-maintained.",
     sections: [
       {
-        heading: "Wood Fence Restoration",
+        heading: "Why Does My Wood Fence Turn Gray and How Can Pressure Washing Fix It?",
         body: "Wood fences in St. Augustine face constant assault from moisture, UV rays, and organic growth. Cedar, pine, and pressure-treated wood all gray and weather over time. Mold and mildew penetrate the wood grain, creating dark stains that garden hoses can't touch. Our cleaning process uses wood-appropriate pressure and cleaning solutions to lift embedded dirt and kill organic growth without damaging the wood fibers. After cleaning, your fence's natural color returns. This is also the ideal time to apply a wood stain or sealant for long-lasting protection.",
       },
       {
-        heading: "Vinyl Fence Cleaning",
+        heading: "How Do You Remove Green Algae from a Vinyl Fence?",
         body: "Vinyl fences are marketed as low-maintenance, but in Florida's climate, they develop green algae, dark mold stains, and a dingy film that makes them look neglected. Our cleaning process uses the right combination of pressure and cleaning agents to restore vinyl to its original bright white finish. We clean all fence styles including privacy, picket, semi-privacy, and ranch rail. Our process won't warp or crack vinyl panels \u2014 just remove the buildup that's hiding their clean appearance.",
       },
       {
-        heading: "Complete Property Enhancement",
+        heading: "Should I Clean My Fence at the Same Time as My House or Driveway?",
         body: "A clean fence ties your entire property together. When your driveway, house, and fence are all clean, the effect is dramatically better than cleaning just one element. Many of our customers combine fence cleaning with driveway or house washing for a complete property refresh. We offer package pricing for multi-service cleanings. Whether you're preparing your home for sale, hosting an event, or simply maintaining your property's appearance, a professional fence cleaning delivers immediate, visible results.",
       },
     ],
@@ -257,6 +278,12 @@ export const services: ServiceData[] = [
       },
     ],
     ctaText: "Get a Free Fence Cleaning Quote",
+    pricing: [
+      { label: "Wood fence cleaning", range: "$1.00–$2.00 per linear ft" },
+      { label: "Vinyl fence cleaning", range: "$1.00–$1.75 per linear ft" },
+      { label: "Aluminum fence cleaning", range: "$0.75–$1.50 per linear ft" },
+      { label: "Most fence jobs", range: "$200–$500" },
+    ],
   },
   {
     slug: "commercial-pressure-washing",
@@ -271,15 +298,15 @@ export const services: ServiceData[] = [
       "First impressions matter in business. Customers notice dirty sidewalks, stained parking lots, and grimy building exteriors \u2014 and they form opinions before they walk through your door. Our commercial pressure washing service keeps your business property looking professional, welcoming, and well-maintained. From storefronts and restaurants to office buildings and HOA common areas, we help businesses across St. Augustine put their best face forward.",
     sections: [
       {
-        heading: "Services for Every Commercial Property",
+        heading: "What Commercial Surfaces Can Be Pressure Washed?",
         body: "We clean all types of commercial surfaces: building exteriors and facades, sidewalks and walkways, parking lots and garages, dumpster pads, drive-throughs, loading docks, awnings and canopies, and concrete common areas. Our commercial-grade equipment handles large surface areas efficiently, minimizing disruption to your business operations. We work with restaurants, retail stores, office complexes, medical facilities, churches, HOA communities, and industrial properties throughout Northeast Florida.",
       },
       {
-        heading: "Flexible Scheduling for Businesses",
+        heading: "Can Commercial Pressure Washing Be Done After Business Hours?",
         body: "We understand that business operations can't stop for cleaning. That's why we offer early morning, evening, and weekend scheduling to work around your hours. For restaurants and food service businesses, we can clean before you open so your entrance and patio are spotless when customers arrive. Retail locations can be serviced during off-hours. We also offer recurring maintenance contracts \u2014 weekly, bi-weekly, monthly, or quarterly \u2014 so your property stays consistently clean without you having to remember to schedule each cleaning.",
       },
       {
-        heading: "Compliance and Liability",
+        heading: "Does Pressure Washing Reduce Slip-and-Fall Liability for Businesses?",
         body: "Dirty, slippery walkways and parking areas are liability risks. Algae and mold growth on concrete surfaces create slip hazards that can lead to customer injuries and costly claims. Many municipalities and HOAs have property maintenance requirements that include exterior cleanliness. Regular commercial pressure washing reduces your liability exposure, helps you stay compliant with local codes, and demonstrates that your business takes property maintenance seriously. We carry full commercial insurance and can provide certificates of insurance on request.",
       },
     ],
@@ -306,6 +333,12 @@ export const services: ServiceData[] = [
       },
     ],
     ctaText: "Get a Free Commercial Cleaning Quote",
+    pricing: [
+      { label: "Sidewalk and walkway cleaning", range: "$0.15–$0.35 per sq ft" },
+      { label: "Building exterior soft wash", range: "$0.20–$0.50 per sq ft" },
+      { label: "Parking lot/garage cleaning", range: "$0.10–$0.25 per sq ft" },
+      { label: "Dumpster pad cleaning", range: "$75–$200 per pad" },
+    ],
   },
 ]
 
