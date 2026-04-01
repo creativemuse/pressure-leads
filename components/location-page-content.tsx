@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, ArrowLeft, MapPin, ChevronDown, ChevronUp, CheckCircle2 } from "lucide-react"
+import { ArrowRight, MapPin, ChevronDown, ChevronUp, ChevronRight, CheckCircle2 } from "lucide-react"
 
 import { GlassmorphismNav } from "@/components/glassmorphism-nav"
 import { Footer } from "@/components/footer"
@@ -35,13 +35,13 @@ export function LocationPageContent({
           {/* Hero */}
           <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 text-white/60 hover:text-white text-sm mb-8 transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to Home
-              </Link>
+              <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm mb-8">
+                <Link href="/" className="text-white/60 hover:text-white transition-colors">
+                  Home
+                </Link>
+                <ChevronRight className="w-3.5 h-3.5 text-white/40" />
+                <span className="text-white/90">{location.city}</span>
+              </nav>
 
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-white mb-6 leading-tight">
                 {location.h1}

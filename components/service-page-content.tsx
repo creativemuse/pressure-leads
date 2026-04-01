@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, ArrowLeft, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react"
+import { ArrowRight, CheckCircle2, ChevronDown, ChevronUp, ChevronRight, MapPin } from "lucide-react"
 
 import { GlassmorphismNav } from "@/components/glassmorphism-nav"
 import { Footer } from "@/components/footer"
@@ -14,9 +14,11 @@ import type { ServiceData } from "@/data/services"
 export function ServicePageContent({
   service,
   otherServices,
+  locationLinks,
 }: {
   service: ServiceData
   otherServices: { slug: string; name: string }[]
+  locationLinks: { slug: string; city: string }[]
 }) {
   const [isQuoteFormOpen, setIsQuoteFormOpen] = useState(false)
   const [openFaq, setOpenFaq] = useState<number | null>(0)
@@ -33,13 +35,13 @@ export function ServicePageContent({
           {/* Hero */}
           <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 text-white/60 hover:text-white text-sm mb-8 transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to Home
-              </Link>
+              <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm mb-8">
+                <Link href="/" className="text-white/60 hover:text-white transition-colors">
+                  Home
+                </Link>
+                <ChevronRight className="w-3.5 h-3.5 text-white/40" />
+                <span className="text-white/90">{service.name}</span>
+              </nav>
 
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-white mb-6 leading-tight">
                 {service.h1}
@@ -165,6 +167,31 @@ export function ServicePageContent({
                   Get My Free Quote
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
                 </button>
+              </div>
+            </div>
+          </section>
+
+          {/* Service Areas */}
+          <section className="px-4 sm:px-6 lg:px-8 pb-12">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-xl md:text-2xl font-light text-white mb-6 text-center">
+                {service.name} Available In
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {locationLinks.map((l) => (
+                  <Link
+                    key={l.slug}
+                    href={`/locations/${l.slug}`}
+                    className="p-4 rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] transition-colors group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <MapPin className="w-5 h-5 text-white/40 group-hover:text-white/60 transition-colors shrink-0" />
+                      <span className="text-white/80 group-hover:text-white transition-colors">
+                        {l.city}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
               </div>
             </div>
           </section>

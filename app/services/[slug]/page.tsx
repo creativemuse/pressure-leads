@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getServiceBySlug, getAllServiceSlugs, services } from "@/data/services"
+import { locations } from "@/data/locations"
 import { ServicePageContent } from "@/components/service-page-content"
 
 const SITE_URL = "https://www.staugustinepressurewashingpros.com"
@@ -133,6 +134,8 @@ export default async function ServicePage({ params }: Props) {
     .filter((s) => s.slug !== service.slug)
     .map((s) => ({ slug: s.slug, name: s.name }))
 
+  const locationLinks = locations.map((l) => ({ slug: l.slug, city: l.city }))
+
   const serviceSchema = {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -213,7 +216,7 @@ export default async function ServicePage({ params }: Props) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
         />
       )}
-      <ServicePageContent service={service} otherServices={otherServices} />
+      <ServicePageContent service={service} otherServices={otherServices} locationLinks={locationLinks} />
     </>
   )
 }
