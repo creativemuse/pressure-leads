@@ -1,4 +1,6 @@
 import type { MetadataRoute } from "next"
+import { getAllServiceSlugs } from "@/data/services"
+import { getAllLocationSlugs } from "@/data/locations"
 
 const CANONICAL_SITE_URL = "https://www.staugustinepressurewashingpros.com"
 
@@ -13,6 +15,20 @@ function resolveSiteUrl(): string {
 export default function sitemap(): MetadataRoute.Sitemap {
   const siteUrl = resolveSiteUrl()
 
+  const servicePages: MetadataRoute.Sitemap = getAllServiceSlugs().map((slug) => ({
+    url: `${siteUrl}/services/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly",
+    priority: 0.8,
+  }))
+
+  const locationPages: MetadataRoute.Sitemap = getAllLocationSlugs().map((slug) => ({
+    url: `${siteUrl}/locations/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly",
+    priority: 0.8,
+  }))
+
   return [
     {
       url: siteUrl,
@@ -26,5 +42,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.8,
     },
+    ...servicePages,
+    ...locationPages,
   ]
 }
