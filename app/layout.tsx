@@ -46,7 +46,6 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: siteTitle,
   description: siteDescription,
-  generator: "v0.app",
   openGraph: {
     title: siteTitle,
     description: siteDescription,

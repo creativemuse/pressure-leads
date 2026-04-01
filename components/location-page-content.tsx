@@ -21,7 +21,7 @@ export function LocationPageContent({
   serviceLinks: { slug: string; name: string }[]
 }) {
   const [isQuoteFormOpen, setIsQuoteFormOpen] = useState(false)
-  const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [openFaq, setOpenFaq] = useState<number | null>(0)
 
   return (
     <div className="min-h-screen bg-black overflow-hidden">
@@ -63,6 +63,7 @@ export function LocationPageContent({
                   width={1200}
                   height={600}
                   className="w-full h-64 md:h-96 object-cover"
+                  priority
                 />
               </div>
             </div>
@@ -160,11 +161,15 @@ export function LocationPageContent({
                         <ChevronDown className="w-5 h-5 text-white/50 shrink-0" />
                       )}
                     </button>
-                    {openFaq === i && (
+                    <div
+                      className={`overflow-hidden transition-all duration-300 ${
+                        openFaq === i ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                      }`}
+                    >
                       <div className="px-5 pb-5">
                         <p className="text-white/70 leading-relaxed">{faq.answer}</p>
                       </div>
-                    )}
+                    </div>
                   </div>
                 ))}
               </div>

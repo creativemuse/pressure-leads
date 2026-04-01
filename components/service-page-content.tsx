@@ -19,7 +19,7 @@ export function ServicePageContent({
   otherServices: { slug: string; name: string }[]
 }) {
   const [isQuoteFormOpen, setIsQuoteFormOpen] = useState(false)
-  const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [openFaq, setOpenFaq] = useState<number | null>(0)
 
   return (
     <div className="min-h-screen bg-black overflow-hidden">
@@ -61,6 +61,7 @@ export function ServicePageContent({
                   width={1200}
                   height={600}
                   className="w-full h-64 md:h-96 object-cover"
+                  priority
                 />
               </div>
             </div>
@@ -81,6 +82,33 @@ export function ServicePageContent({
               </div>
             </section>
           ))}
+
+          {/* Pricing Section */}
+          {service.pricing && service.pricing.length > 0 && (
+            <section className="px-4 sm:px-6 lg:px-8 pb-12">
+              <div className="max-w-4xl mx-auto">
+                <div className="p-6 md:p-8 rounded-2xl border border-white/10 bg-white/[0.03]">
+                  <h2 className="text-xl md:text-2xl font-light text-white mb-6">
+                    {service.name} Pricing
+                  </h2>
+                  <div className="space-y-3">
+                    {service.pricing.map((item, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between py-3 border-b border-white/10 last:border-b-0"
+                      >
+                        <span className="text-white/70">{item.label}</span>
+                        <span className="text-white font-medium ml-4 text-right">{item.range}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-white/50 text-sm mt-4">
+                    Prices are estimates for the St. Augustine and Northeast Florida area. Contact us for a free, no-obligation quote for your specific project.
+                  </p>
+                </div>
+              </div>
+            </section>
+          )}
 
           {/* FAQ Section */}
           <section className="px-4 sm:px-6 lg:px-8 pb-16">
@@ -105,11 +133,15 @@ export function ServicePageContent({
                         <ChevronDown className="w-5 h-5 text-white/50 shrink-0" />
                       )}
                     </button>
-                    {openFaq === i && (
+                    <div
+                      className={`overflow-hidden transition-all duration-300 ${
+                        openFaq === i ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                      }`}
+                    >
                       <div className="px-5 pb-5">
                         <p className="text-white/70 leading-relaxed">{faq.answer}</p>
                       </div>
-                    )}
+                    </div>
                   </div>
                 ))}
               </div>

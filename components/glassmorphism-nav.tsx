@@ -32,22 +32,17 @@ export function GlassmorphismNav({ onQuoteClick }: GlassmorphismNavProps) {
       if (typeof window !== "undefined") {
         const currentScrollY = window.scrollY
 
-        console.log("[v0] Scroll event - currentScrollY:", currentScrollY, "lastScrollY:", lastScrollY.current)
-
         // Only hide/show after scrolling past 50px to avoid flickering at top
         if (currentScrollY > 50) {
           if (currentScrollY > lastScrollY.current && currentScrollY - lastScrollY.current > 5) {
             // Scrolling down - hide navbar
-            console.log("[v0] Hiding navbar - scrolling down")
             setIsVisible(false)
           } else if (lastScrollY.current - currentScrollY > 5) {
             // Scrolling up - show navbar
-            console.log("[v0] Showing navbar - scrolling up")
             setIsVisible(true)
           }
         } else {
           // Always show navbar when near top
-          console.log("[v0] Showing navbar - near top")
           setIsVisible(true)
         }
 
@@ -57,12 +52,10 @@ export function GlassmorphismNav({ onQuoteClick }: GlassmorphismNavProps) {
 
     if (typeof window !== "undefined") {
       window.addEventListener("scroll", controlNavbar, { passive: true })
-      console.log("[v0] Scroll listener added")
 
       return () => {
         window.removeEventListener("scroll", controlNavbar)
         clearTimeout(timer)
-        console.log("[v0] Scroll listener removed")
       }
     }
 
@@ -74,28 +67,18 @@ export function GlassmorphismNav({ onQuoteClick }: GlassmorphismNavProps) {
       return
     }
 
-    console.log("[v0] Attempting to scroll to:", href)
     const element = document.querySelector(href)
     if (element) {
-      console.log("[v0] Found element:", element)
-
       const rect = element.getBoundingClientRect()
       const currentScrollY = window.pageYOffset || document.documentElement.scrollTop
       const elementAbsoluteTop = rect.top + currentScrollY
       const navbarHeight = 120
       const targetPosition = Math.max(0, elementAbsoluteTop - navbarHeight)
 
-      console.log("[v0] Element rect.top:", rect.top)
-      console.log("[v0] Current scroll position:", currentScrollY)
-      console.log("[v0] Element absolute top:", elementAbsoluteTop)
-      console.log("[v0] Target scroll position:", targetPosition)
-
       window.scrollTo({
         top: targetPosition,
         behavior: "smooth",
       })
-    } else {
-      console.log("[v0] Element not found for:", href)
     }
     setIsOpen(false)
   }
@@ -142,22 +125,20 @@ export function GlassmorphismNav({ onQuoteClick }: GlassmorphismNavProps) {
                     >
                       {item.name}
                     </button>
-                  ) : item.href.startsWith("/") ? (
-                    <Link
+                  ) : (
+                    <a
                       key={item.name}
                       href={item.href}
+                      onClick={(e) => {
+                        if (item.href.startsWith("#")) {
+                          e.preventDefault()
+                          scrollToSection(item.href)
+                        }
+                      }}
                       className="text-white/80 hover:text-white hover:scale-105 transition-all duration-200 font-medium cursor-pointer"
                     >
                       {item.name}
-                    </Link>
-                  ) : (
-                    <button
-                      key={item.name}
-                      onClick={() => scrollToSection(item.href)}
-                      className="text-white/80 hover:text-white hover:scale-105 transition-all duration-200 font-medium cursor-pointer"
-                    >
-                      {item.name}
-                    </button>
+                    </a>
                   ),
                 )}
               </div>
@@ -232,24 +213,18 @@ export function GlassmorphismNav({ onQuoteClick }: GlassmorphismNavProps) {
                     >
                       {item.name}
                     </button>
-                  ) : item.href.startsWith("/") ? (
-                    <Link
+                  ) : (
+                    <a
                       key={item.name}
                       href={item.href}
-                      className={`text-white/80 hover:text-white hover:bg-white/10 rounded-lg px-3 py-3 text-left transition-all duration-300 font-medium cursor-pointer transform hover:scale-[1.02] hover:translate-x-1 ${
-                        isOpen ? "animate-mobile-menu-item" : ""
-                      }`}
-                      style={{
-                        animationDelay: isOpen ? `${index * 80 + 100}ms` : "0ms",
+                      onClick={(e) => {
+                        if (item.href.startsWith("#")) {
+                          e.preventDefault()
+                          scrollToSection(item.href)
+                        } else {
+                          setIsOpen(false)
+                        }
                       }}
-                      onClick={() => setIsOpen(false)}
-                    >
-                      {item.name}
-                    </Link>
-                  ) : (
-                    <button
-                      key={item.name}
-                      onClick={() => scrollToSection(item.href)}
                       className={`text-white/80 hover:text-white hover:bg-white/10 rounded-lg px-3 py-3 text-left transition-all duration-300 font-medium cursor-pointer transform hover:scale-[1.02] hover:translate-x-1 ${
                         isOpen ? "animate-mobile-menu-item" : ""
                       }`}
@@ -258,7 +233,7 @@ export function GlassmorphismNav({ onQuoteClick }: GlassmorphismNavProps) {
                       }}
                     >
                       {item.name}
-                    </button>
+                    </a>
                   ),
                 )}
                 <div className="h-px bg-white/10 my-2" />
