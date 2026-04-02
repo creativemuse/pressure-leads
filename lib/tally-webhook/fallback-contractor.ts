@@ -13,3 +13,12 @@ export function getFallbackContractorFromEnv(): { email: string; phoneE164: stri
   }
   return { email, phoneE164 }
 }
+
+/** Returns null instead of throwing when fallback contractor env vars are missing. */
+export function tryGetFallbackContractorFromEnv(): { email: string; phoneE164: string } | null {
+  try {
+    return getFallbackContractorFromEnv()
+  } catch {
+    return null
+  }
+}

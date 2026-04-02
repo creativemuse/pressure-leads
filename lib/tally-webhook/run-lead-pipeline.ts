@@ -9,7 +9,7 @@ import { createLeadRecord, updateLeadStatus } from "@/lib/lead-state"
 
 import { recordLeadProcessed } from "@/lib/lead-stats"
 
-import { getFallbackContractorFromEnv } from "./fallback-contractor"
+import { tryGetFallbackContractorFromEnv } from "./fallback-contractor"
 import {
   extractPressureWashingLeadFromPayload,
   leadEmailBodyWithStructuredFacts,
@@ -78,9 +78,9 @@ function tallyResponseId(payload: unknown): string | undefined {
   return undefined
 }
 
-function crossmintHeaders(): Record<string, string> {
+function crossmintHeaders(): Record<string, string> | null {
   const key = process.env.CROSSMINT_API_KEY
-  if (!key) throw new Error("Missing CROSSMINT_API_KEY")
+  if (!key) return null
   const h: Record<string, string> = {
     "X-API-KEY": key,
     "Content-Type": "application/json",
@@ -234,29 +234,28 @@ async function sendPipelineFailureAlert(
  */
 export async function runLeadPipeline(payload: unknown): Promise<void> {
   const responseId = tallyResponseId(payload)
-  const fallback = getFallbackContractorFromEnv()
+  const fallback = tryGetFallbackContractorFromEnv()
+  if (!fallback) console.info("[tally-webhook] fallback contractor not configured; leads without ZIP match route to admin")
   let currentStep = "contractor-resolution"
   let zip: string | null = null
   let contractorEmail: string | null = null
 
   try {
-    const resolved = await resolveContractorForLead(payload, {
-      email: fallback.email,
-      phoneE164: fallback.phoneE164,
-    })
+    const { resend, from: resendFrom } = getResendConfig()
+    const adminEmail = process.env.ADMIN_EMAIL!.trim()
+
+    // Resolve contractor — if no fallback configured, ZIP-matched contractors still work;
+    // unmatched leads route to admin below.
+    const resolved = fallback
+      ? await resolveContractorForLead(payload, { email: fallback.email, phoneE164: fallback.phoneE164 })
+      : await resolveContractorForLead(payload, { email: adminEmail, phoneE164: "" })
     const contractor = resolved.contractor
     zip = resolved.zip
     contractorEmail = contractor.email
-    console.info("[tally-webhook] contractor", { source: contractor.source, zip, responseId })
+    const isAdminFallback = !fallback && contractor.source === "default"
+    console.info("[tally-webhook] contractor", { source: contractor.source, isAdminFallback, zip, responseId })
 
     const pinataJwt = process.env.PINATA_JWT!
-    const leadFee = process.env.LEAD_FEE_USDC!.trim()
-    const treasury = process.env.TREASURY_WALLET_ADDRESS!.trim()
-    const crossmintBase = (process.env.CROSSMINT_API_BASE ?? DEFAULT_CROSSMINT_API_BASE).replace(/\/$/, "")
-    const chain = (process.env.CROSSMINT_CHAIN ?? DEFAULT_CROSSMINT_CHAIN).trim()
-    const tokenLocator = `${chain}:usdc`
-    const walletSeg = crossmintWalletPathSegment(contractor)
-    const encodedWallet = encodeURIComponent(walletSeg)
 
     const anthropicKey = process.env.ANTHROPIC_API_KEY?.trim()
     const anthropic = anthropicKey ? new Anthropic({ apiKey: anthropicKey }) : null
@@ -290,11 +289,10 @@ export async function runLeadPipeline(payload: unknown): Promise<void> {
     if (leadFields.email) {
       currentStep = "consumer-followup"
       try {
-        const { resend: followUpResend, from: followUpFrom } = getResendConfig()
         const followUpBody = await generateFollowUpMessage(anthropic, leadFields)
         await sendConsumerFollowUp({
-          resend: followUpResend,
-          from: followUpFrom,
+          resend,
+          from: resendFrom,
           consumerEmail: leadFields.email,
           consumerName: leadFields.first_name,
           followUpBody,
@@ -311,9 +309,38 @@ export async function runLeadPipeline(payload: unknown): Promise<void> {
     const scoreHeader = `Lead Score: ${leadScore}/10 (${leadScoreTag})\n`
     const leadEmailBody = scoreHeader + leadEmailBodyWithStructuredFacts(leadSummary, payload)
 
+    // --- Payment via Crossmint (optional — degrades to admin routing when unconfigured) ---
+    const crossmintHdrs = crossmintHeaders()
+    const leadFee = process.env.LEAD_FEE_USDC?.trim()
+    const treasury = process.env.TREASURY_WALLET_ADDRESS?.trim()
+    const crossmintConfigured = !!(crossmintHdrs && leadFee && treasury)
+
+    if (!crossmintConfigured || isAdminFallback) {
+      // Route to admin when payment infra or contractor is not configured
+      currentStep = "admin-email-manual-routing"
+      const reasons: string[] = []
+      if (!crossmintHdrs) reasons.push("CROSSMINT_API_KEY not set")
+      if (!leadFee) reasons.push("LEAD_FEE_USDC not set")
+      if (!treasury) reasons.push("TREASURY_WALLET_ADDRESS not set")
+      if (isAdminFallback) reasons.push("no contractor match and no fallback configured")
+      const reasonStr = reasons.join("; ")
+      console.info("[tally-webhook] skipping payment, routing to admin", { reasons: reasonStr, responseId })
+      const manualText = `MANUAL ROUTING REQUIRED (${reasonStr}).\n${leadEmailBody}`
+      await sendLeadEmail(resend, resendFrom, adminEmail, "Pressure Leads: manual routing required", manualText)
+      await recordLeadProcessed(zip)
+      console.info("[tally-webhook] done", { responseId, routing: "admin", payment: "skipped", zip })
+      return
+    }
+
+    const crossmintBase = (process.env.CROSSMINT_API_BASE ?? DEFAULT_CROSSMINT_API_BASE).replace(/\/$/, "")
+    const chain = (process.env.CROSSMINT_CHAIN ?? DEFAULT_CROSSMINT_CHAIN).trim()
+    const tokenLocator = `${chain}:usdc`
+    const walletSeg = crossmintWalletPathSegment(contractor)
+    const encodedWallet = encodeURIComponent(walletSeg)
+
     currentStep = "crossmint-balance-check"
     const balanceUrl = `${crossmintBase}/2025-06-09/wallets/${encodedWallet}/balances?tokens=usdc&chains=${encodeURIComponent(chain)}`
-    const balanceRes = await fetch(balanceUrl, { headers: crossmintHeaders() })
+    const balanceRes = await fetch(balanceUrl, { headers: crossmintHdrs })
     const balanceJson: unknown = await balanceRes.json().catch(() => ({}))
     if (!balanceRes.ok) {
       console.error("[tally-webhook] crossmint balance", balanceRes.status, JSON.stringify(balanceJson).slice(0, 300))
@@ -327,9 +354,6 @@ export async function runLeadPipeline(payload: unknown): Promise<void> {
     }
 
     const funded = usdcDecimalStringGte(balanceStr, leadFee)
-
-    const { resend, from: resendFrom } = getResendConfig()
-    const adminEmail = process.env.ADMIN_EMAIL!.trim()
 
     if (!funded) {
       currentStep = "admin-email-insufficient-funds"
@@ -347,7 +371,7 @@ export async function runLeadPipeline(payload: unknown): Promise<void> {
     const idempotencyKey = responseId ? `tally-${responseId}` : `tally-${ipfsCid.slice(0, 16)}`
 
     const transferHeaders: Record<string, string> = {
-      ...crossmintHeaders(),
+      ...crossmintHdrs,
       "x-idempotency-key": idempotencyKey,
     }
 

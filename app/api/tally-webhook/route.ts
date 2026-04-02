@@ -1,8 +1,6 @@
 import { waitUntil } from "@vercel/functions"
 import { type NextRequest, NextResponse } from "next/server"
 
-import { isEvmAddress } from "@/lib/evm-address"
-import { getFallbackContractorFromEnv } from "@/lib/tally-webhook/fallback-contractor"
 import { runLeadPipeline } from "@/lib/tally-webhook/run-lead-pipeline"
 import { SIGNATURE_HEADERS, verifyTallySignature } from "@/lib/tally-webhook/tally-signature"
 
@@ -12,9 +10,10 @@ export const runtime = "nodejs"
 export const maxDuration = 60
 
 /**
- * Required: `TALLY_WEBHOOK_SECRET`, `PINATA_JWT`, `CROSSMINT_API_KEY`,
- * `RESEND_API_KEY`, `RESEND_FROM` (production: address on a verified domain in Resend), `ADMIN_EMAIL`,
- * `LEAD_FEE_USDC`, `TREASURY_WALLET_ADDRESS`,
+ * Required (webhook fails without these): `TALLY_WEBHOOK_SECRET`, `PINATA_JWT`,
+ * `RESEND_API_KEY`, `RESEND_FROM`, `ADMIN_EMAIL`.
+ * Recommended (pipeline degrades to admin routing without these):
+ * `CROSSMINT_API_KEY`, `LEAD_FEE_USDC`, `TREASURY_WALLET_ADDRESS`,
  * `CONTRACTOR_FALLBACK_EMAIL`, `CONTRACTOR_FALLBACK_PHONE_E164` (E.164).
  * Optional: `ANTHROPIC_API_KEY` (enables AI-generated emails; template fallback when absent),
  * `CROSSMINT_PROJECT_ID`, `CROSSMINT_API_BASE`, `CROSSMINT_CHAIN`, `ANTHROPIC_MODEL`,
@@ -34,22 +33,17 @@ function tallyResponseId(payload: unknown): string | undefined {
   return undefined
 }
 
+/** Only checks the truly essential vars — the ones needed to accept and email about ANY lead. */
 function assertPipelineEnv(): void {
   const required = [
     "PINATA_JWT",
-    "CROSSMINT_API_KEY",
     "RESEND_API_KEY",
     "RESEND_FROM",
     "ADMIN_EMAIL",
-    "LEAD_FEE_USDC",
-    "TREASURY_WALLET_ADDRESS",
   ] as const
   for (const k of required) {
     if (!process.env[k]?.trim()) throw new Error(`Missing required env: ${k}`)
   }
-  const treasury = process.env.TREASURY_WALLET_ADDRESS!.trim()
-  if (!isEvmAddress(treasury)) throw new Error("TREASURY_WALLET_ADDRESS must be a 0x-prefixed 40-hex address")
-  getFallbackContractorFromEnv()
 }
 
 export async function POST(request: NextRequest) {

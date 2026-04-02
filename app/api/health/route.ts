@@ -36,33 +36,45 @@ async function checkKv(): Promise<ServiceStatus> {
   }
 }
 
-function checkPipelineEnv(): { configured: boolean; missing: string[] } {
+function checkPipelineEnv(): {
+  configured: boolean
+  missingRequired: string[]
+  missingRecommended: string[]
+} {
   const required = [
     "TALLY_WEBHOOK_SECRET",
     "PINATA_JWT",
-    "CROSSMINT_API_KEY",
     "RESEND_API_KEY",
     "RESEND_FROM",
     "ADMIN_EMAIL",
+  ]
+  const recommended = [
+    "CROSSMINT_API_KEY",
     "LEAD_FEE_USDC",
     "TREASURY_WALLET_ADDRESS",
     "CONTRACTOR_FALLBACK_EMAIL",
     "CONTRACTOR_FALLBACK_PHONE_E164",
   ]
-  const missing = required.filter((k) => !process.env[k]?.trim())
-  return { configured: missing.length === 0, missing }
+  const missingRequired = required.filter((k) => !process.env[k]?.trim())
+  const missingRecommended = recommended.filter((k) => !process.env[k]?.trim())
+  return { configured: missingRequired.length === 0, missingRequired, missingRecommended }
 }
 
 export async function GET() {
   const [redis, kvStatus] = await Promise.all([checkRedis(), checkKv()])
   const pipeline = checkPipelineEnv()
 
-  const healthy = redis.ok && kvStatus.ok && pipeline.configured
+  // Healthy = required env set. Degraded = webhook works but routes to admin for some leads.
+  const healthy = pipeline.configured
   const status = healthy ? 200 : 503
 
   return NextResponse.json(
     {
-      status: healthy ? "healthy" : "degraded",
+      status: healthy
+        ? pipeline.missingRecommended.length === 0
+          ? "healthy"
+          : "degraded"
+        : "unhealthy",
       timestamp: new Date().toISOString(),
       services: {
         redis,
@@ -70,7 +82,8 @@ export async function GET() {
       },
       pipeline: {
         configured: pipeline.configured,
-        ...(pipeline.missing.length > 0 ? { missingEnvVars: pipeline.missing } : {}),
+        ...(pipeline.missingRequired.length > 0 ? { missingRequired: pipeline.missingRequired } : {}),
+        ...(pipeline.missingRecommended.length > 0 ? { missingRecommended: pipeline.missingRecommended } : {}),
       },
     },
     { status },
